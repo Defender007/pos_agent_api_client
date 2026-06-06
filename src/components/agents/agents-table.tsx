@@ -1,5 +1,5 @@
 import StatusBadge from "@/components/ui/custom/status-badge";
-import { Agent } from "@/types/agents";
+import { Agent } from "@/types/agent";
 import Link from "next/link";
 import SectionCard from "@/components/ui/custom/section-card";
 import DataTable from "@/components/ui/custom/data-table";
@@ -58,10 +58,12 @@ export default function AgentsTable({ agents }: AgentsTableProps) {
                 >
                   Edit
                 </Link>
-
-                <button className="rounded-md border border-red-200 px-3 py-1 text-sm text-red-600 hover:bg-red-50">
+                <Link
+                  href={`/agents/${agent.id}/status`}
+                  className="rounded-md border border-red-200 px-3 py-1 text-sm text-red-600 hover:bg-red-50"
+                >
                   Suspend
-                </button>
+                </Link>
               </div>
             </td>
           </tr>

@@ -1,79 +1,121 @@
-import Link from "next/link";
-import PageContainer from "@/components/layout/page-container";
+import { redirect } from "next/navigation";
 
-export default function DashboardPage() {
+import { getAgents } from "@/lib/api/agents";
+
+import PageContainer from "@/components/layout/page-container";
+import PageTitle from "@/components/layout/page-title";
+
+function StatCard({ title, value }: { title: string; value: number }) {
+  return (
+    <div className="rounded-xl border bg-white p-6 shadow-sm">
+      <p className="text-sm text-gray-500">{title}</p>
+
+      <h2 className="mt-2 text-3xl font-bold">{value}</h2>
+    </div>
+  );
+}
+
+export default async function DashboardPage() {
+  let agents = [];
+
+  try {
+    agents = await getAgents();
+  } catch (error) {
+    if (error instanceof Error && error.message === "SESSION_EXPIRED") {
+      redirect("/login?session=expired");
+    }
+
+    throw error;
+  }
+
+  const totalAgents = agents.length;
+
+  const activeAgents = agents.filter(
+    (agent) => agent.status === "active",
+  ).length;
+
+  const pendingAgents = agents.filter(
+    (agent) => agent.status === "pending",
+  ).length;
+
+  const suspendedAgents = agents.filter(
+    (agent) => agent.status === "suspended",
+  ).length;
+
+  const recentAgents = [...agents].slice(0, 5);
+
   return (
     <PageContainer>
-      {/* KPI Cards */}
+      <PageTitle
+        title="Dashboard"
+        description="SoftPOS Agent Operations Overview"
+      />
+
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
-        <div className="rounded-xl border bg-white p-6">
-          <h3 className="text-sm text-gray-500">Total Agents</h3>
-          <p className="mt-2 text-3xl font-bold">245</p>
-        </div>
+        <StatCard title="Total Agents" value={totalAgents} />
 
-        <div className="rounded-xl border bg-white p-6">
-          <h3 className="text-sm text-gray-500">Active Agents</h3>
-          <p className="mt-2 text-3xl font-bold">210</p>
-        </div>
+        <StatCard title="Active Agents" value={activeAgents} />
 
-        <div className="rounded-xl border bg-white p-6">
-          <h3 className="text-sm text-gray-500">Suspended Agents</h3>
-          <p className="mt-2 text-3xl font-bold">12</p>
-        </div>
+        <StatCard title="Pending Agents" value={pendingAgents} />
 
-        <div className="rounded-xl border bg-white p-6">
-          <h3 className="text-sm text-gray-500">Total Users</h3>
-          <p className="mt-2 text-3xl font-bold">18</p>
-        </div>
+        <StatCard title="Suspended Agents" value={suspendedAgents} />
       </div>
 
-      {/* Recent Agents */}
-      <div className="rounded-xl border bg-white p-6">
+      <div className="mt-8 rounded-xl border bg-white p-6 shadow-sm">
         <div className="mb-4 flex items-center justify-between">
           <h2 className="text-lg font-semibold">Recent Agents</h2>
-
-          <Link
-            href="/agents/new"
-            className="rounded-lg bg-black px-4 py-2 text-sm text-white"
-          >
-            Add Agent
-          </Link>
         </div>
 
-        <table className="w-full border-collapse">
-          <thead>
-            <tr className="border-b text-left">
-              <th className="py-3">Agent Code</th>
-              <th className="py-3">Name</th>
-              <th className="py-3">Phone</th>
-              <th className="py-3">Status</th>
-            </tr>
-          </thead>
+        <div className="overflow-hidden rounded-lg border">
+          <table className="w-full">
+            <thead className="bg-gray-50">
+              <tr>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                  Agent Code
+                </th>
 
-          <tbody>
-            <tr className="border-b">
-              <td className="py-4">AGT-001</td>
-              <td className="py-4">John Doe</td>
-              <td className="py-4">08012345678</td>
-              <td className="py-4">
-                <span className="rounded-full bg-green-100 px-3 py-1 text-sm text-green-700">
-                  Active
-                </span>
-              </td>
-            </tr>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                  Name
+                </th>
 
-            <tr className="border-b">
-              <td className="py-4">AGT-002</td>
-              <td className="py-4">Mary Johnson</td>
-              <td className="py-4">08087654321</td>
-              <td className="py-4">
-                <span className="rounded-full bg-red-100 px-3 py-1 text-sm text-red-700">
-                  Suspended
-                </span>
-              </td>
-            </tr>
-          </tbody>
-        </table>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                  Business
+                </th>
+
+                <th className="px-6 py-4 text-left text-sm font-semibold text-gray-600">
+                  Status
+                </th>
+              </tr>
+            </thead>
+
+            <tbody className="divide-y divide-gray-200 bg-white">
+              {recentAgents.map((agent) => (
+                <tr
+                  key={agent.id}
+                  className="border-b border-gray-200 hover:bg-gray-50"
+                >
+                  <td className="px-6 py-4 text-sm font-medium text-gray-900">
+                    {agent.agentCode}
+                  </td>
+
+                  <td className="px-6 py-4 text-sm text-gray-700">
+                    {agent.fullName}
+                  </td>
+
+                  <td className="px-6 py-4 text-sm text-gray-700">
+                    {agent.businessName}
+                  </td>
+
+                  <td className="px-6 py-4">
+                    <span className="inline-flex rounded-full bg-gray-100 px-3 py-1 text-xs font-semibold capitalize text-gray-700">
+                      {agent.status}
+                    </span>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
       </div>
     </PageContainer>
   );

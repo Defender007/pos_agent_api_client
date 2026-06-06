@@ -1,84 +1,72 @@
-import StatusBadge from "@/components/ui/custom/status-badge";
-import SectionCard from "@/components/ui/custom/section-card";
+import { getAgentById } from "@/lib/api/agents";
 import PageContainer from "@/components/layout/page-container";
 import PageTitle from "@/components/layout/page-title";
+import SectionCard from "@/components/ui/custom/section-card";
+import StatusBadge from "@/components/ui/custom/status-badge";
 
 type AgentDetailsPageProps = {
-  params: Promise<{
-    id: string;
-  }>;
+  params: Promise<{ id: string }>;
 };
+
+function DetailItem({ label, value }: { label: string; value?: string }) {
+  return (
+    <div>
+      <p className="text-sm text-gray-500">{label}</p>
+      <p className="font-medium">{value || "—"}</p>
+    </div>
+  );
+}
 
 export default async function AgentDetailsPage({
   params,
 }: AgentDetailsPageProps) {
   const { id } = await params;
+  const agent = await getAgentById(id);
 
   return (
     <PageContainer>
       <div className="flex items-center justify-between">
         <PageTitle
           title="Agent Details"
-          description="View agent profile information"
+          description="Complete agent and KYC profile"
         />
 
-        <StatusBadge status="active" />
+        <StatusBadge status={agent.status} />
       </div>
 
       <div className="grid gap-6 lg:grid-cols-2">
-        {/* Profile Information */}
         <SectionCard>
-          <h2 className="mb-4 text-lg font-semibold">Profile Information</h2>
+          <h2 className="mb-4 text-lg font-semibold">Agent Information</h2>
 
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm text-gray-500">Agent ID</p>
-
-              <p className="font-medium">{id}</p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500">Full Name</p>
-
-              <p className="font-medium">John Doe</p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500">Phone Number</p>
-
-              <p className="font-medium">08012345678</p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500">Business Name</p>
-
-              <p className="font-medium">Doe Ventures</p>
-            </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {/*<DetailItem label="Agent ID" value={agent.id} />*/}
+            <DetailItem label="Agent Code" value={agent.agentCode} />
+            <DetailItem label="First Name" value={agent.firstName} />
+            <DetailItem label="Last Name" value={agent.lastName} />
+            <DetailItem label="Phone" value={agent.phone} />
+            <DetailItem label="Email" value={agent.email} />
+            <DetailItem label="Business Name" value={agent.businessName} />
+            {/*<DetailItem label="Created At" value={agent.createdAt} />*/}
+            {/*<DetailItem label="Updated At" value={agent.updatedAt} />*/}
           </div>
         </SectionCard>
 
-        {/* KYC Information */}
         <SectionCard>
           <h2 className="mb-4 text-lg font-semibold">KYC Information</h2>
 
-          <div className="space-y-4">
-            <div>
-              <p className="text-sm text-gray-500">BVN</p>
-
-              <p className="font-medium">22334455667</p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500">NIN</p>
-
-              <p className="font-medium">55667788990</p>
-            </div>
-
-            <div>
-              <p className="text-sm text-gray-500">Address</p>
-
-              <p className="font-medium">15 Admiralty Way, Lagos</p>
-            </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {/*<DetailItem label="KYC ID" value={agent.kyc?.id} />*/}
+            {/*<DetailItem label="Agent ID" value={agent.kyc?.agentId} />*/}
+            <DetailItem label="BVN" value={agent.kyc?.bvn} />
+            <DetailItem label="NIN" value={agent.kyc?.nin} />
+            <DetailItem label="IMEI" value={agent.kyc?.imei} />
+            <DetailItem
+              label="Verification Status"
+              value={agent.kyc?.verificationStatus}
+            />
+            <DetailItem label="Notes" value={agent.kyc?.notes} />
+            {/*<DetailItem label="Created At" value={agent.kyc?.createdAt} />*/}
+            {/*<DetailItem label="Updated At" value={agent.kyc?.updatedAt} />*/}
           </div>
         </SectionCard>
       </div>

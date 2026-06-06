@@ -1,44 +1,39 @@
-import PageHeader from "@/components/layout/page-header";
-import { Agent } from "@/types/agents";
-import AgentsTable from "@/components/agents/agents-table";
 import Link from "next/link";
+import { redirect } from "next/navigation";
+
+import { getAgents } from "@/lib/api/agents";
+
 import PageContainer from "@/components/layout/page-container";
+import PageTitle from "@/components/layout/page-title";
 
-const agents: Agent[] = [
-  {
-    id: "1",
-    agentCode: "AGT-001",
-    fullName: "John Doe",
-    phone: "08012345678",
-    businessName: "Doe Ventures",
-    status: "active",
-  },
-  {
-    id: "2",
-    agentCode: "AGT-002",
-    fullName: "Mary Johnson",
-    phone: "08087654321",
-    businessName: "MJ Stores",
-    status: "suspended",
-  },
-];
+import AgentsTable from "@/components/agents/agents-table";
 
-// const agents: Agent[] = [];
-export default function AgentsPage() {
+export default async function AgentsPage() {
+  let agents = [];
+
+  try {
+    agents = await getAgents();
+  } catch (error) {
+    if (error instanceof Error && error.message === "SESSION_EXPIRED") {
+      redirect("/login?session=expired");
+    }
+
+    throw error;
+  }
+
   return (
     <PageContainer>
-      <PageHeader
-        title="Agents"
-        description="Manage SoftPOS agents"
-        action={
-          <Link
-            href="/agents/new"
-            className="rounded-lg bg-black px-4 py-2 text-white"
-          >
-            Add Agent
-          </Link>
-        }
-      />
+      <div className="mb-6 flex items-center justify-between">
+        <PageTitle title="Agents" description="Manage all onboarded agents" />
+
+        <Link
+          href="/agents/new"
+          className="rounded-lg bg-black px-4 py-2 text-sm font-medium text-white hover:bg-gray-800"
+        >
+          Add Agent
+        </Link>
+      </div>
+
       <AgentsTable agents={agents} />
     </PageContainer>
   );
