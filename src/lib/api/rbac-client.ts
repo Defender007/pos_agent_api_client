@@ -42,3 +42,31 @@ export async function createPermission(payload: {
 
   return response.json();
 }
+
+export async function createStaff(payload: {
+  email: string;
+  password: string;
+  role: string;
+
+  profile: {
+    first_name: string;
+    last_name: string;
+    middle_name?: string;
+    designation?: string;
+    organisation?: string;
+    staff_id?: string;
+    phone?: string;
+  };
+}) {
+  const response = await fetch(`${API_BASE_URL}/auth/register`, {
+    method: "POST",
+    headers: await getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to create staff");
+  }
+
+  return response.json();
+}
