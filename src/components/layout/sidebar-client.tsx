@@ -2,7 +2,13 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import { LayoutDashboard, Users, ShieldCheck, UserCog } from "lucide-react";
+import {
+  LayoutDashboard,
+  Users,
+  ShieldCheck,
+  UserCog,
+  KeyRound,
+} from "lucide-react";
 
 export default function SidebarClient() {
   const pathname = usePathname();
@@ -34,6 +40,10 @@ export default function SidebarClient() {
       <Link href="/roles" className={itemClass("/roles")}>
         <ShieldCheck size={18} />
         Roles
+      </Link>
+      <Link href="/permissions" className={itemClass("/permissions")}>
+        <KeyRound size={18} />
+        Permissions
       </Link>
     </nav>
   );
