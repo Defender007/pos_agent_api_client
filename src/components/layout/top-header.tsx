@@ -2,24 +2,24 @@
 
 import { usePathname } from "next/navigation";
 
+function getTitle(pathname: string) {
+  if (pathname.startsWith("/agents")) return "Agent Management";
+  if (pathname.startsWith("/dashboard")) return "Dashboard";
+  if (pathname.startsWith("/staff")) return "Staff Administration";
+  if (pathname.startsWith("/roles")) return "Roles & Permissions";
+  return "SoftPOS Portal";
+}
+
 export default function TopHeader() {
   const pathname = usePathname();
 
   return (
-    <header className="flex items-center justify-between border-b bg-white px-6 py-4">
-      <h2 className="text-xl font-semibold capitalize">
-        {pathname.split("/")[1]?.replace("-", " ") || "Dashboard"}
-      </h2>
+    <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/90 px-8 py-5 backdrop-blur">
+      <h2 className="text-xl font-bold text-slate-900">{getTitle(pathname)}</h2>
 
-      <div className="flex items-center gap-4">
-        <button className="rounded-lg border px-4 py-2 text-sm">
-          Notifications
-        </button>
-
-        <div className="flex h-10 w-10 items-center justify-center rounded-full bg-gray-200">
-          TA
-        </div>
-      </div>
+      <p className="mt-1 text-sm text-slate-500">
+        Secure SoftPOS agent operations and compliance workspace
+      </p>
     </header>
   );
 }

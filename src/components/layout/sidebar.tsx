@@ -1,82 +1,53 @@
-import Link from "next/link";
 import { logout } from "@/app/logout/actions";
 import { getCurrentAdminProfile } from "@/lib/api/rbac";
+import SidebarClient from "@/components/layout/sidebar-client";
 
 export default async function Sidebar() {
-  let permissions: string[] = [];
-  let email = "";
+  let email = "Admin User";
+  let roles: string[] = [];
 
   try {
     const profile = await getCurrentAdminProfile();
-
-    permissions = profile.permissions;
     email = profile.email;
+    roles = profile.roles;
   } catch (error) {
     console.error(error);
   }
 
-  const canManageAgents = permissions.includes("agents.manage");
-
-  const canManageStaff = permissions.includes("staff.manage");
-
-  const canViewAnalytics = permissions.includes("analytics.view");
-
   return (
-    <aside className="flex h-screen w-64 flex-col border-r bg-white p-6">
-      <div className="mb-8">
-        <h1 className="text-xl font-bold">SoftPOS Portal</h1>
+    <aside className="flex h-screen w-64 flex-col border-r border-slate-200 bg-white px-5 py-6 shadow-sm">
+      <div>
+        <h1 className="text-3xl font-black tracking-tight text-slate-900">
+          SoftPOS
+        </h1>
 
-        {email && <p className="mt-1 text-sm text-gray-500">{email}</p>}
+        <p className="mt-2 text-sm text-slate-500">Operations Portal</p>
+
+        <div className="mt-5 rounded-2xl bg-slate-50 p-4">
+          <p className="truncate text-sm font-semibold text-slate-900">
+            {email}
+          </p>
+
+          {roles.length > 0 && (
+            <p className="mt-1 truncate text-xs font-medium text-slate-500">
+              {roles.join(", ")}
+            </p>
+          )}
+        </div>
       </div>
 
-      <nav className="flex flex-col gap-2">
-        {canViewAnalytics && (
-          <Link
-            href="/dashboard"
-            className="rounded-lg px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100"
-          >
-            Dashboard
-          </Link>
-        )}
+      <SidebarClient />
 
-        {canManageAgents && (
-          <Link
-            href="/agents"
-            className="rounded-lg px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100"
-          >
-            Agents
-          </Link>
-        )}
-
-        {canManageStaff && (
-          <Link
-            href="/staff"
-            className="rounded-lg px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100"
-          >
-            Staff
-          </Link>
-        )}
-
-        {canManageStaff && (
-          <Link
-            href="/roles"
-            className="rounded-lg px-4 py-3 text-sm font-medium text-gray-700 hover:bg-gray-100"
-          >
-            Roles
-          </Link>
-        )}
-      </nav>
       <form
         action={async () => {
           "use server";
-
           await logout();
         }}
         className="mt-auto"
       >
         <button
           type="submit"
-          className="w-full rounded-lg border border-red-200 px-4 py-3 text-sm font-medium text-red-600 hover:bg-red-50"
+          className="flex w-full items-center justify-center rounded-xl border border-red-200 px-4 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50"
         >
           Logout
         </button>
