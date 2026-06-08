@@ -1,6 +1,7 @@
 import Sidebar from "@/components/layout/sidebar";
 import TopHeader from "@/components/layout/top-header";
 import { getCurrentAdminProfile } from "@/lib/api/rbac";
+import { redirect } from "next/navigation";
 
 export default async function DashboardLayout({
   children,
@@ -15,6 +16,10 @@ export default async function DashboardLayout({
     email = profile.email;
     roles = profile.roles;
   } catch (error) {
+    if (error instanceof Error && error.message === "SESSION_EXPIRED") {
+      redirect("/login?session=expired");
+    }
+
     console.error(error);
   }
 
