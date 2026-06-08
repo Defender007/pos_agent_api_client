@@ -1,16 +1,26 @@
 import { getStaffUsers } from "@/lib/api/rbac";
 import PageContainer from "@/components/layout/page-container";
 import PageTitle from "@/components/layout/page-title";
+import Link from "next/link";
 
 export default async function StaffPage() {
   const staffUsers = await getStaffUsers();
 
   return (
     <PageContainer>
-      <PageTitle
-        title="Staff Administration"
-        description="Manage admin staff profiles, roles, and access"
-      />
+      <div className="mb-6 flex items-center justify-between">
+        <PageTitle
+          title="Staff Administration"
+          description="Manage admin staff profiles, roles, and access"
+        />
+
+        <Link
+          href="/staff/new"
+          className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+        >
+          Create Staff
+        </Link>
+      </div>
 
       <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
         <table className="w-full">
