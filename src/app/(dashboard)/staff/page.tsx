@@ -33,6 +33,7 @@ export default async function StaffPage() {
                 "Staff ID",
                 "Email",
                 "Roles",
+                "Actions",
               ].map((h) => (
                 <th
                   key={h}
@@ -79,6 +80,15 @@ export default async function StaffPage() {
 
                   <td className="px-6 py-4 text-sm text-slate-700">
                     {staff.roles.join(", ") || "—"}
+                  </td>
+
+                  <td className="px-6 py-4">
+                    <Link
+                      href={`/staff/${staff.id}/edit`}
+                      className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                    >
+                      Edit
+                    </Link>
                   </td>
                 </tr>
               );

@@ -70,3 +70,32 @@ export async function createStaff(payload: {
 
   return response.json();
 }
+
+export async function updateStaff(
+  staffId: string,
+  payload: {
+    email?: string;
+    password?: string;
+    profile?: {
+      first_name?: string;
+      last_name?: string;
+      middle_name?: string;
+      designation?: string;
+      organisation?: string;
+      staff_id?: string;
+      phone?: string;
+    };
+  },
+) {
+  const response = await fetch(`${API_BASE_URL}/rbac/staff/${staffId}`, {
+    method: "PATCH",
+    headers: await getAuthHeaders(),
+    body: JSON.stringify(payload),
+  });
+
+  if (!response.ok) {
+    throw new Error("Failed to update staff");
+  }
+
+  return response.json();
+}
