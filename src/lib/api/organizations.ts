@@ -57,7 +57,7 @@ export async function createOrganizationStaff(
   organizationId: string,
   payload: {
     email: string;
-    password: string;
+    password?: string;
     role: string;
     profile: {
       first_name: string;

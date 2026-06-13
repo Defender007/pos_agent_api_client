@@ -31,6 +31,18 @@ export default function EditOrganizationStaffForm({
   const [loading, setLoading] = useState(false);
 
   const profile = staff.profile;
+  const profileFields: {
+    name: string;
+    label: string;
+    value?: string | null;
+  }[] = [
+    { name: "first_name", label: "First Name", value: profile?.first_name },
+    { name: "last_name", label: "Last Name", value: profile?.last_name },
+    { name: "middle_name", label: "Middle Name", value: profile?.middle_name },
+    { name: "designation", label: "Designation", value: profile?.designation },
+    { name: "staff_id", label: "Staff ID", value: profile?.staff_id },
+    { name: "phone", label: "Phone", value: profile?.phone },
+  ];
 
   return (
     <div className="mx-auto max-w-3xl rounded-2xl border bg-white p-8 shadow-sm">
@@ -112,14 +124,7 @@ export default function EditOrganizationStaffForm({
           />
         </div>
 
-        {[
-          ["first_name", "First Name", profile?.first_name],
-          ["last_name", "Last Name", profile?.last_name],
-          ["middle_name", "Middle Name", profile?.middle_name],
-          ["designation", "Designation", profile?.designation],
-          ["staff_id", "Staff ID", profile?.staff_id],
-          ["phone", "Phone", profile?.phone],
-        ].map(([name, label, value]) => (
+        {profileFields.map(({ name, label, value }) => (
           <div key={name}>
             <label className="mb-2 block text-sm font-semibold text-slate-700">
               {label}

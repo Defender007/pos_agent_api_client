@@ -1,9 +1,13 @@
 import PageContainer from "@/components/layout/page-container";
 import PageTitle from "@/components/layout/page-title";
-import { getOrganizationStaff } from "@/lib/api/organizations-server";
 import Link from "next/link";
 
-import { getOrganization } from "@/lib/api/organizations-server";
+import {
+  getOrganization,
+  getOrganizationAgents,
+  getOrganizationStaff,
+  type OrganizationStaffMember,
+} from "@/lib/api/organizations-server";
 
 type Props = {
   params: Promise<{
@@ -14,8 +18,11 @@ type Props = {
 export default async function OrganizationDetailPage({ params }: Props) {
   const { id } = await params;
 
-  const organization = await getOrganization(id);
-  const staff = await getOrganizationStaff(id);
+  const [organization, staff, agents] = await Promise.all([
+    getOrganization(id),
+    getOrganizationStaff(id),
+    getOrganizationAgents(id),
+  ]);
 
   return (
     <PageContainer>
@@ -73,6 +80,7 @@ export default async function OrganizationDetailPage({ params }: Props) {
           </div>
         </div>
       </div>
+
       <div className="mt-8 rounded-2xl border bg-white p-6 shadow-sm">
         <div className="mb-5 flex items-center justify-between">
           <div>
@@ -109,7 +117,7 @@ export default async function OrganizationDetailPage({ params }: Props) {
             </thead>
 
             <tbody className="divide-y divide-slate-200">
-              {staff.map((member: any) => {
+              {staff.map((member: OrganizationStaffMember) => {
                 const profile = member.profile;
 
                 const fullName = profile
@@ -154,6 +162,85 @@ export default async function OrganizationDetailPage({ params }: Props) {
             </tbody>
           </table>
         </div>
+      </div>
+
+      <div className="mt-8 rounded-2xl border bg-white p-6 shadow-sm">
+        <div className="mb-5">
+          <h2 className="text-xl font-bold text-slate-900">Agents</h2>
+
+          <p className="text-sm text-slate-500">
+            Agents under this organization
+          </p>
+        </div>
+
+        {agents.length === 0 ? (
+          <div className="rounded-xl border border-dashed px-6 py-10 text-center">
+            <p className="text-sm text-slate-500">
+              No agents have been created under this organization yet.
+            </p>
+          </div>
+        ) : (
+          <div className="overflow-hidden rounded-xl border">
+            <table className="w-full">
+              <thead className="bg-slate-50">
+                <tr>
+                  {[
+                    "Agent Code",
+                    "Name",
+                    "Business Name",
+                    "Phone",
+                    "Email",
+                    "Status",
+                  ].map((h) => (
+                    <th
+                      key={h}
+                      className="px-6 py-4 text-left text-sm font-semibold text-slate-600"
+                    >
+                      {h}
+                    </th>
+                  ))}
+                </tr>
+              </thead>
+
+              <tbody className="divide-y divide-slate-200">
+                {agents.map((agent) => {
+                  const fullName =
+                    `${agent.first_name} ${agent.last_name}`.trim() || "—";
+
+                  return (
+                    <tr key={agent.id} className="hover:bg-slate-50">
+                      <td className="px-6 py-4 text-sm font-semibold text-slate-900">
+                        {agent.agent_code || "—"}
+                      </td>
+
+                      <td className="px-6 py-4 text-sm text-slate-700">
+                        {fullName}
+                      </td>
+
+                      <td className="px-6 py-4 text-sm text-slate-700">
+                        {agent.business_name || "—"}
+                      </td>
+
+                      <td className="px-6 py-4 text-sm text-slate-700">
+                        {agent.phone || "—"}
+                      </td>
+
+                      <td className="px-6 py-4 text-sm text-slate-700">
+                        {agent.email || "—"}
+                      </td>
+
+                      <td className="px-6 py-4 text-sm">
+                        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                          {agent.status || "—"}
+                        </span>
+                      </td>
+                    </tr>
+                  );
+                })}
+              </tbody>
+            </table>
+          </div>
+        )}
       </div>
     </PageContainer>
   );
