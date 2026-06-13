@@ -1,20 +1,23 @@
+import { cookies } from "next/headers";
+import { redirect } from "next/navigation";
+
 import Sidebar from "@/components/layout/sidebar";
 import TopHeader from "@/components/layout/top-header";
 import { getCurrentAdminProfile } from "@/lib/api/rbac";
-import { redirect } from "next/navigation";
 
 export default async function DashboardLayout({
   children,
 }: {
   children: React.ReactNode;
 }) {
-  let email = "";
-  let roles: string[] = [];
+  const cookieStore = await cookies();
+
+  const hasBankToken = Boolean(cookieStore.get("bank_access_token")?.value);
 
   try {
-    const profile = await getCurrentAdminProfile();
-    email = profile.email;
-    roles = profile.roles;
+    if (!hasBankToken) {
+      await getCurrentAdminProfile();
+    }
   } catch (error) {
     if (error instanceof Error && error.message === "SESSION_EXPIRED") {
       redirect("/login?session=expired");

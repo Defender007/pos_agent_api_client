@@ -8,6 +8,7 @@ import {
   ShieldCheck,
   UserCog,
   KeyRound,
+  Building2,
 } from "lucide-react";
 
 export default function SidebarClient() {
@@ -26,7 +27,10 @@ export default function SidebarClient() {
         <LayoutDashboard size={18} />
         Dashboard
       </Link>
-
+      <Link href="/organizations" className={itemClass("/organizations")}>
+        <Building2 size={18} />
+        Organizations
+      </Link>
       <Link href="/agents" className={itemClass("/agents")}>
         <Users size={18} />
         Agents

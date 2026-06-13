@@ -1,17 +1,25 @@
+import { cookies } from "next/headers";
+
 import { logout } from "@/app/logout/actions";
 import { getCurrentAdminProfile } from "@/lib/api/rbac";
 import SidebarClient from "@/components/layout/sidebar-client";
 
 export default async function Sidebar() {
-  let email = "Admin User";
-  let roles: string[] = [];
+  const cookieStore = await cookies();
 
-  try {
-    const profile = await getCurrentAdminProfile();
-    email = profile.email;
-    roles = profile.roles;
-  } catch (error) {
-    console.error(error);
+  const hasBankToken = Boolean(cookieStore.get("bank_access_token")?.value);
+
+  let email = hasBankToken ? "Bank Staff" : "Admin User";
+  let roles: string[] = hasBankToken ? ["Backoffice"] : [];
+
+  if (!hasBankToken) {
+    try {
+      const profile = await getCurrentAdminProfile();
+      email = profile.email;
+      roles = profile.roles;
+    } catch (error) {
+      console.error(error);
+    }
   }
 
   return (
@@ -41,6 +49,7 @@ export default async function Sidebar() {
       <form
         action={async () => {
           "use server";
+
           await logout();
         }}
         className="mt-auto"
