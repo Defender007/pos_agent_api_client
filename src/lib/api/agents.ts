@@ -29,6 +29,16 @@ type SingleAgentApiResponse = {
     phone: string;
     email: string;
     business_name: string;
+    tid?: string | null;
+    address?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
+    location?: {
+      address?: string | null;
+      latitude?: number | null;
+      longitude?: number | null;
+      capture_method?: string | null;
+    };
     status: Agent["status"];
     created_at: string;
     updated_at: string;
@@ -111,6 +121,11 @@ export async function getAgentById(agentId: string): Promise<Agent> {
     phone: result.data.phone,
     email: result.data.email,
     businessName: result.data.business_name,
+    tid: result.data.tid,
+    address: result.data.address ?? result.data.location?.address,
+    latitude: result.data.latitude ?? result.data.location?.latitude,
+    longitude: result.data.longitude ?? result.data.location?.longitude,
+    location: result.data.location,
     status: result.data.status,
     createdAt: result.data.created_at,
     updatedAt: result.data.updated_at,

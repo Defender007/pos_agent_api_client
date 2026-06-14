@@ -31,10 +31,14 @@ export default function SidebarClient({ hasBankToken }: SidebarClientProps) {
         <LayoutDashboard size={18} />
         Dashboard
       </Link>
-      <Link href="/organizations" className={itemClass("/organizations")}>
-        <Building2 size={18} />
-        Organizations
-      </Link>
+
+      {hasBankToken && (
+        <Link href="/organizations" className={itemClass("/organizations")}>
+          <Building2 size={18} />
+          Organizations
+        </Link>
+      )}
+
       <Link
         href={hasBankToken ? "/agents/approvals" : "/agents"}
         className={itemClass("/agents")}
@@ -43,19 +47,24 @@ export default function SidebarClient({ hasBankToken }: SidebarClientProps) {
         Agents
       </Link>
 
-      <Link href="/staff" className={itemClass("/staff")}>
-        <UserCog size={18} />
-        Staff
-      </Link>
+      {hasBankToken && (
+        <>
+          <Link href="/staff" className={itemClass("/staff")}>
+            <UserCog size={18} />
+            Staff
+          </Link>
 
-      <Link href="/roles" className={itemClass("/roles")}>
-        <ShieldCheck size={18} />
-        Roles
-      </Link>
-      <Link href="/permissions" className={itemClass("/permissions")}>
-        <KeyRound size={18} />
-        Permissions
-      </Link>
+          <Link href="/roles" className={itemClass("/roles")}>
+            <ShieldCheck size={18} />
+            Roles
+          </Link>
+
+          <Link href="/permissions" className={itemClass("/permissions")}>
+            <KeyRound size={18} />
+            Permissions
+          </Link>
+        </>
+      )}
     </nav>
   );
 }

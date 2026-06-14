@@ -3,6 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
+import { ApiError } from "@/lib/api/api-error";
 import { bankReviewAgent } from "@/lib/api/bank-agents-client";
 
 type AgentApprovalActionsProps = {
@@ -37,6 +38,17 @@ export default function AgentApprovalActions({
       );
       router.refresh();
     } catch (reviewError) {
+      if (
+        reviewError instanceof ApiError &&
+        reviewError.status === 409 &&
+        reviewError.message === "No available TID for agent approval"
+      ) {
+        setError(
+          "No available TID. Please preload TIDs before approving this agent.",
+        );
+        return;
+      }
+
       const fallback =
         decision === "approved"
           ? "Unable to approve agent."

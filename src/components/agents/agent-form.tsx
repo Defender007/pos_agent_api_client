@@ -29,9 +29,53 @@ export default function AgentForm({
   const router = useRouter();
   const isEdit = mode === "edit";
   const resolvedBusinessName = isEdit ? agent?.businessName : businessName;
-  const canCreateAgent = mode !== "create" || Boolean(resolvedBusinessName);
+  const [latitude, setLatitude] = useState<number | null>(null);
+  const [longitude, setLongitude] = useState<number | null>(null);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationError, setLocationError] = useState<string | null>(null);
+  const hasCapturedLocation = latitude !== null && longitude !== null;
+  const canCreateAgent =
+    mode !== "create" || (Boolean(resolvedBusinessName) && hasCapturedLocation);
 
   const [indemnityAccepted, setIndemnityAccepted] = useState(false);
+
+  function captureCurrentLocation() {
+    setLocationError(null);
+
+    if (!navigator.geolocation) {
+      setLocationError(
+        "Your browser does not support location capture. Please use a browser with geolocation support.",
+      );
+      return;
+    }
+
+    setLocationLoading(true);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLatitude(position.coords.latitude);
+        setLongitude(position.coords.longitude);
+        setLocationLoading(false);
+      },
+      (error) => {
+        if (error.code === error.PERMISSION_DENIED) {
+          setLocationError(
+            "Location permission was denied. Please allow location access to create this agent.",
+          );
+        } else {
+          setLocationError(
+            "Unable to capture your current location. Please try again.",
+          );
+        }
+
+        setLocationLoading(false);
+      },
+      {
+        enableHighAccuracy: true,
+        timeout: 15000,
+      },
+    );
+  }
 
   return (
     <form
@@ -47,6 +91,11 @@ export default function AgentForm({
 
         if (mode === "create" && !indemnityAccepted) {
           alert("Please accept the indemnity before creating the agent.");
+          return;
+        }
+
+        if (mode === "create" && !hasCapturedLocation) {
+          alert("Please capture the agent operating location before creating the agent.");
           return;
         }
 
@@ -74,6 +123,12 @@ export default function AgentForm({
               },
               ...(mode === "create"
                 ? {
+                    location: {
+                      address: String(formData.get("location_address") || ""),
+                      latitude: latitude as number,
+                      longitude: longitude as number,
+                      capture_method: "browser_geolocation",
+                    },
                     indemnity: {
                       accepted: true,
                       version: "softpos-agent-profile-indemnity-v1",
@@ -202,6 +257,76 @@ export default function AgentForm({
             placeholder="Enter onboarding notes"
             defaultValue={isEdit ? agent?.kyc?.notes : undefined}
           />
+
+          {mode === "create" && (
+            <div className="md:col-span-2 rounded-lg border bg-slate-50 p-4">
+              <div className="flex flex-col gap-3 md:flex-row md:items-center md:justify-between">
+                <div>
+                  <h3 className="text-sm font-semibold text-slate-900">
+                    Agent Operating Location
+                  </h3>
+                  <p className="text-sm text-slate-500">
+                    Capture the agent location from this browser before creating
+                    the agent.
+                  </p>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={captureCurrentLocation}
+                  disabled={locationLoading}
+                  className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  {locationLoading ? "Getting location..." : "Use Current Location"}
+                </button>
+              </div>
+
+              {locationError && (
+                <p className="mt-3 text-sm font-medium text-red-600">
+                  {locationError}
+                </p>
+              )}
+
+              <div className="mt-4 grid gap-4 md:grid-cols-2">
+                <div className="md:col-span-2">
+                  <label className="mb-2 block text-sm font-medium">
+                    Address
+                  </label>
+                  <input
+                    name="location_address"
+                    placeholder="Enter operating location address"
+                    className="w-full rounded-lg border bg-white px-4 py-2"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium">
+                    Latitude
+                  </label>
+                  <input
+                    name="latitude"
+                    value={latitude ?? ""}
+                    readOnly
+                    placeholder="Capture current location"
+                    className="w-full rounded-lg border bg-white px-4 py-2 text-slate-600"
+                  />
+                </div>
+
+                <div>
+                  <label className="mb-2 block text-sm font-medium">
+                    Longitude
+                  </label>
+                  <input
+                    name="longitude"
+                    value={longitude ?? ""}
+                    readOnly
+                    placeholder="Capture current location"
+                    className="w-full rounded-lg border bg-white px-4 py-2 text-slate-600"
+                  />
+                </div>
+              </div>
+            </div>
+          )}
 
           {mode === "create" && (
             <div className="md:col-span-2 rounded-lg border bg-gray-50 p-4">

@@ -21,6 +21,16 @@ export type Agent = {
   phone: string;
   email?: string;
   businessName: string;
+  tid?: string | null;
+  address?: string | null;
+  latitude?: number | null;
+  longitude?: number | null;
+  location?: {
+    address?: string | null;
+    latitude?: number | null;
+    longitude?: number | null;
+    capture_method?: string | null;
+  };
   status: AgentStatus;
   createdAt?: string;
   updatedAt?: string;
@@ -39,6 +49,12 @@ export type CreateAgentPayload = {
     nin: string;
     imei: string;
     notes?: string;
+  };
+  location: {
+    address: string;
+    latitude: number;
+    longitude: number;
+    capture_method: "browser_geolocation";
   };
   indemnity: {
     accepted: boolean;

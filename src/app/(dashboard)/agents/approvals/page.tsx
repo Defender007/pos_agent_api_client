@@ -67,6 +67,7 @@ function AgentsTableSection({
     "Phone",
     "Email",
     "Organization",
+    "TID",
     "Status",
     ...(showActions ? ["Actions"] : []),
   ];
@@ -124,6 +125,10 @@ function AgentsTableSection({
 
                   <td className="px-6 py-4 text-sm text-slate-700">
                     {getOrganizationName(agent)}
+                  </td>
+
+                  <td className="px-6 py-4 text-sm text-slate-700">
+                    {agent.tid || "—"}
                   </td>
 
                   <td className="px-6 py-4 text-sm">

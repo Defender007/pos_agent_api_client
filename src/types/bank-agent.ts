@@ -19,6 +19,7 @@ export type BankAgent = {
   phone: string;
   email?: string | null;
   business_name: string;
+  tid?: string | null;
   status: string;
   organization_id?: string | null;
   organization_name?: string | null;

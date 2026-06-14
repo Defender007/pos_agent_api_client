@@ -190,6 +190,7 @@ export default async function OrganizationDetailPage({ params }: Props) {
                     "Business Name",
                     "Phone",
                     "Email",
+                    "TID",
                     "Status",
                   ].map((h) => (
                     <th
@@ -227,6 +228,10 @@ export default async function OrganizationDetailPage({ params }: Props) {
 
                       <td className="px-6 py-4 text-sm text-slate-700">
                         {agent.email || "—"}
+                      </td>
+
+                      <td className="px-6 py-4 text-sm text-slate-700">
+                        {agent.tid || "—"}
                       </td>
 
                       <td className="px-6 py-4 text-sm">
