@@ -38,7 +38,9 @@ export default function LoginPage() {
                     password,
                   });
 
-                  document.cookie = `access_token=${response.data.access_token}; path=/; max-age=86400; SameSite=Lax`;
+                  document.cookie = `access_token=${encodeURIComponent(
+                    response.data.access_token,
+                  )}; path=/; max-age=86400; SameSite=Lax`;
 
                   router.push("/dashboard");
                 } catch (error) {

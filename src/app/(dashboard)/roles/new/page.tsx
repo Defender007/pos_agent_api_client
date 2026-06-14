@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { createRole } from "@/lib/api/rbac-client";
+import { createBankadminRole } from "@/lib/api/bankadmin-rbac-client";
 
 export default function NewRolePage() {
   const router = useRouter();
@@ -30,7 +30,7 @@ export default function NewRolePage() {
           const formData = new FormData(e.currentTarget);
 
           try {
-            await createRole({
+            await createBankadminRole({
               name: String(formData.get("name")),
               description: String(formData.get("description")),
             });

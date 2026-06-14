@@ -1,12 +1,12 @@
 import Link from "next/link";
 
-import { getPermissions } from "@/lib/api/rbac";
+import { getBankadminPermissions } from "@/lib/api/bankadmin-rbac-server";
 
 import PageContainer from "@/components/layout/page-container";
 import PageTitle from "@/components/layout/page-title";
 
 export default async function PermissionsPage() {
-  const permissions = await getPermissions();
+  const permissions = await getBankadminPermissions();
 
   return (
     <PageContainer>

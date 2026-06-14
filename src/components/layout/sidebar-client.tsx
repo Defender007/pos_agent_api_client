@@ -8,9 +8,14 @@ import {
   ShieldCheck,
   UserCog,
   KeyRound,
+  Building2,
 } from "lucide-react";
 
-export default function SidebarClient() {
+type SidebarClientProps = {
+  hasBankToken: boolean;
+};
+
+export default function SidebarClient({ hasBankToken }: SidebarClientProps) {
   const pathname = usePathname();
 
   const itemClass = (path: string) =>
@@ -27,24 +32,39 @@ export default function SidebarClient() {
         Dashboard
       </Link>
 
-      <Link href="/agents" className={itemClass("/agents")}>
+      {hasBankToken && (
+        <Link href="/organizations" className={itemClass("/organizations")}>
+          <Building2 size={18} />
+          Organizations
+        </Link>
+      )}
+
+      <Link
+        href={hasBankToken ? "/agents/approvals" : "/agents"}
+        className={itemClass("/agents")}
+      >
         <Users size={18} />
         Agents
       </Link>
 
-      <Link href="/staff" className={itemClass("/staff")}>
-        <UserCog size={18} />
-        Staff
-      </Link>
+      {hasBankToken && (
+        <>
+          <Link href="/staff" className={itemClass("/staff")}>
+            <UserCog size={18} />
+            Staff
+          </Link>
 
-      <Link href="/roles" className={itemClass("/roles")}>
-        <ShieldCheck size={18} />
-        Roles
-      </Link>
-      <Link href="/permissions" className={itemClass("/permissions")}>
-        <KeyRound size={18} />
-        Permissions
-      </Link>
+          <Link href="/roles" className={itemClass("/roles")}>
+            <ShieldCheck size={18} />
+            Roles
+          </Link>
+
+          <Link href="/permissions" className={itemClass("/permissions")}>
+            <KeyRound size={18} />
+            Permissions
+          </Link>
+        </>
+      )}
     </nav>
   );
 }

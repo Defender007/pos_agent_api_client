@@ -1,11 +1,11 @@
-import { getRoles } from "@/lib/api/rbac";
+import { getBankadminRoles } from "@/lib/api/bankadmin-rbac-server";
 import Link from "next/link";
 
 import PageContainer from "@/components/layout/page-container";
 import PageTitle from "@/components/layout/page-title";
 
 export default async function RolesPage() {
-  const roles = await getRoles();
+  const roles = await getBankadminRoles();
 
   return (
     <PageContainer>
@@ -41,12 +41,12 @@ export default async function RolesPage() {
               </div>
 
               <div className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-600">
-                {role.permissions.length} perms
+                {role.permissions?.length ?? 0} perms
               </div>
             </div>
 
             <div className="mt-6 flex flex-wrap gap-2">
-              {role.permissions.length > 0 ? (
+              {role.permissions?.length ? (
                 role.permissions.map((permission) => (
                   <span
                     key={permission}

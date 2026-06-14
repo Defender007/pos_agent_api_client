@@ -224,7 +224,7 @@ export default function IndemnityPage() {
               <br />
               (d) The Organisation remains bound by the Physical Indemnity
               signed at Organisation onboarding, which extends to cover this
-              Agent's activities; and <br />
+              Agent&apos;s activities; and <br />
               (e) The Organisation will promptly deactivate this Agent’s profile
               if the Agent ceases to be authorised to collect payments on the
               Organisation’s behalf. ☐ I have read, understood, and accept the

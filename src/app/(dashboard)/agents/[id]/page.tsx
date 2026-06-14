@@ -8,11 +8,17 @@ type AgentDetailsPageProps = {
   params: Promise<{ id: string }>;
 };
 
-function DetailItem({ label, value }: { label: string; value?: string }) {
+function DetailItem({
+  label,
+  value,
+}: {
+  label: string;
+  value?: string | number | null;
+}) {
   return (
     <div>
       <p className="text-sm text-gray-500">{label}</p>
-      <p className="font-medium">{value || "—"}</p>
+      <p className="font-medium">{value ?? "—"}</p>
     </div>
   );
 }
@@ -22,6 +28,9 @@ export default async function AgentDetailsPage({
 }: AgentDetailsPageProps) {
   const { id } = await params;
   const agent = await getAgentById(id);
+  const address = agent.address ?? agent.location?.address;
+  const latitude = agent.latitude ?? agent.location?.latitude;
+  const longitude = agent.longitude ?? agent.location?.longitude;
 
   return (
     <PageContainer>
@@ -46,6 +55,7 @@ export default async function AgentDetailsPage({
             <DetailItem label="Phone" value={agent.phone} />
             <DetailItem label="Email" value={agent.email} />
             <DetailItem label="Business Name" value={agent.businessName} />
+            <DetailItem label="TID" value={agent.tid} />
             {/*<DetailItem label="Created At" value={agent.createdAt} />*/}
             {/*<DetailItem label="Updated At" value={agent.updatedAt} />*/}
           </div>
@@ -67,6 +77,19 @@ export default async function AgentDetailsPage({
             <DetailItem label="Notes" value={agent.kyc?.notes} />
             {/*<DetailItem label="Created At" value={agent.kyc?.createdAt} />*/}
             {/*<DetailItem label="Updated At" value={agent.kyc?.updatedAt} />*/}
+          </div>
+        </SectionCard>
+
+        <SectionCard>
+          <h2 className="mb-4 text-lg font-semibold">Operating Location</h2>
+
+          <div className="grid gap-4 md:grid-cols-2">
+            <div className="md:col-span-2">
+              <DetailItem label="Address" value={address} />
+            </div>
+
+            <DetailItem label="Latitude" value={latitude} />
+            <DetailItem label="Longitude" value={longitude} />
           </div>
         </SectionCard>
       </div>

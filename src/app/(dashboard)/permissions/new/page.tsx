@@ -3,7 +3,7 @@
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 
-import { createPermission } from "@/lib/api/rbac-client";
+import { createBankadminPermission } from "@/lib/api/bankadmin-rbac-client";
 
 export default function NewPermissionPage() {
   const router = useRouter();
@@ -26,7 +26,7 @@ export default function NewPermissionPage() {
           const formData = new FormData(e.currentTarget);
 
           try {
-            await createPermission({
+            await createBankadminPermission({
               name: String(formData.get("name")),
               description: String(formData.get("description")),
             });

@@ -3,6 +3,8 @@ type TextInputProps = {
   label: string;
   placeholder?: string;
   defaultValue?: string;
+  readOnly?: boolean;
+  helperText?: string;
 };
 
 export default function TextInput({
@@ -10,6 +12,8 @@ export default function TextInput({
   label,
   placeholder,
   defaultValue,
+  readOnly = false,
+  helperText,
 }: TextInputProps) {
   return (
     <div>
@@ -19,8 +23,13 @@ export default function TextInput({
         name={name}
         defaultValue={defaultValue}
         placeholder={placeholder}
-        className="w-full rounded-lg border px-4 py-2"
+        readOnly={readOnly}
+        className={`w-full rounded-lg border px-4 py-2 ${
+          readOnly ? "bg-slate-50 text-slate-600" : ""
+        }`}
       />
+
+      {helperText && <p className="mt-2 text-xs text-slate-500">{helperText}</p>}
     </div>
   );
 }

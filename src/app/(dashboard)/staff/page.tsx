@@ -1,25 +1,17 @@
-import { getStaffUsers } from "@/lib/api/rbac";
+import { getBankadminStaff } from "@/lib/api/bankadmin-rbac-server";
 import PageContainer from "@/components/layout/page-container";
 import PageTitle from "@/components/layout/page-title";
-import Link from "next/link";
 
 export default async function StaffPage() {
-  const staffUsers = await getStaffUsers();
+  const staffUsers = await getBankadminStaff();
 
   return (
     <PageContainer>
       <div className="mb-6 flex items-center justify-between">
         <PageTitle
           title="Staff Administration"
-          description="Manage admin staff profiles, roles, and access"
+          description="View staff profiles, roles, and access"
         />
-
-        <Link
-          href="/staff/new"
-          className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
-        >
-          Create Staff
-        </Link>
       </div>
 
       <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
@@ -33,6 +25,7 @@ export default async function StaffPage() {
                 "Staff ID",
                 "Email",
                 "Roles",
+                "Actions",
               ].map((h) => (
                 <th
                   key={h}
@@ -45,44 +38,62 @@ export default async function StaffPage() {
           </thead>
 
           <tbody className="divide-y divide-slate-200">
-            {staffUsers.map((staff) => {
-              const profile = staff.profile;
+            {staffUsers.length === 0 ? (
+              <tr>
+                <td
+                  colSpan={7}
+                  className="px-6 py-10 text-center text-sm text-slate-500"
+                >
+                  No staff records found.
+                </td>
+              </tr>
+            ) : (
+              staffUsers.map((staff) => {
+                const profile = staff.profile;
 
-              const fullName = profile
-                ? `${profile.first_name} ${profile.middle_name || ""} ${profile.last_name}`.replace(
-                    /\s+/g,
-                    " ",
-                  )
-                : "—";
+                const fullName = profile
+                  ? `${profile.first_name || ""} ${profile.middle_name || ""} ${
+                      profile.last_name || ""
+                    }`
+                      .replace(/\s+/g, " ")
+                      .trim() || "—"
+                  : "—";
 
-              return (
-                <tr key={staff.id} className="hover:bg-slate-50">
-                  <td className="px-6 py-4 text-sm font-semibold text-slate-900">
-                    {fullName}
-                  </td>
+                const roles = staff.roles?.length
+                  ? staff.roles.join(", ")
+                  : staff.role || "—";
 
-                  <td className="px-6 py-4 text-sm text-slate-700">
-                    {profile?.designation || "—"}
-                  </td>
+                return (
+                  <tr key={staff.id} className="hover:bg-slate-50">
+                    <td className="px-6 py-4 text-sm font-semibold text-slate-900">
+                      {fullName}
+                    </td>
 
-                  <td className="px-6 py-4 text-sm text-slate-700">
-                    {profile?.organisation || "—"}
-                  </td>
+                    <td className="px-6 py-4 text-sm text-slate-700">
+                      {profile?.designation || "—"}
+                    </td>
 
-                  <td className="px-6 py-4 text-sm text-slate-700">
-                    {profile?.staff_id || "—"}
-                  </td>
+                    <td className="px-6 py-4 text-sm text-slate-700">
+                      {profile?.organisation || "—"}
+                    </td>
 
-                  <td className="px-6 py-4 text-sm text-slate-700">
-                    {staff.email}
-                  </td>
+                    <td className="px-6 py-4 text-sm text-slate-700">
+                      {profile?.staff_id || "—"}
+                    </td>
 
-                  <td className="px-6 py-4 text-sm text-slate-700">
-                    {staff.roles.join(", ") || "—"}
-                  </td>
-                </tr>
-              );
-            })}
+                    <td className="px-6 py-4 text-sm text-slate-700">
+                      {staff.email}
+                    </td>
+
+                    <td className="px-6 py-4 text-sm text-slate-700">
+                      {roles}
+                    </td>
+
+                    <td className="px-6 py-4 text-sm text-slate-500">—</td>
+                  </tr>
+                );
+              })
+            )}
           </tbody>
         </table>
       </div>

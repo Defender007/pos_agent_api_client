@@ -1,4 +1,5 @@
 import { cookies } from "next/headers";
+import { parseApiError } from "@/lib/api/api-error";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -55,7 +56,7 @@ export async function getCurrentAdminProfile(): Promise<CurrentAdminProfile> {
   }
 
   if (!response.ok) {
-    throw new Error("Failed to fetch admin profile");
+    throw await parseApiError(response);
   }
 
   const result = await response.json();
@@ -69,7 +70,7 @@ export async function getStaffUsers(): Promise<AdminUser[]> {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to fetch staff users");
+    throw await parseApiError(response);
   }
 
   const result = await response.json();
@@ -87,7 +88,7 @@ export async function createRole(payload: {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to create role");
+    throw await parseApiError(response);
   }
 
   const result = await response.json();
@@ -101,8 +102,7 @@ export async function getRoles(): Promise<Role[]> {
   });
 
   if (!response.ok) {
-    console.error("Failed to fetch roles:", await response.text());
-    return [];
+    throw await parseApiError(response);
   }
 
   const result = await response.json();
@@ -116,7 +116,7 @@ export async function getPermissions(): Promise<Permission[]> {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to fetch permissions");
+    throw await parseApiError(response);
   }
 
   const result = await response.json();
@@ -134,9 +134,24 @@ export async function createPermission(payload: {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to create permission");
+    throw await parseApiError(response);
   }
 
   const result = await response.json();
+  return result.data;
+}
+
+export async function getStaffUser(staffId: string): Promise<AdminUser> {
+  const response = await fetch(`${API_BASE_URL}/rbac/staff/${staffId}`, {
+    cache: "no-store",
+    headers: await getAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    throw await parseApiError(response);
+  }
+
+  const result = await response.json();
+
   return result.data;
 }
