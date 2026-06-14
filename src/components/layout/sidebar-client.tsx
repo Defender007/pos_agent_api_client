@@ -11,7 +11,11 @@ import {
   Building2,
 } from "lucide-react";
 
-export default function SidebarClient() {
+type SidebarClientProps = {
+  hasBankToken: boolean;
+};
+
+export default function SidebarClient({ hasBankToken }: SidebarClientProps) {
   const pathname = usePathname();
 
   const itemClass = (path: string) =>
@@ -31,7 +35,10 @@ export default function SidebarClient() {
         <Building2 size={18} />
         Organizations
       </Link>
-      <Link href="/agents" className={itemClass("/agents")}>
+      <Link
+        href={hasBankToken ? "/agents/approvals" : "/agents"}
+        className={itemClass("/agents")}
+      >
         <Users size={18} />
         Agents
       </Link>

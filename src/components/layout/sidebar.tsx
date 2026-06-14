@@ -44,7 +44,7 @@ export default async function Sidebar() {
         </div>
       </div>
 
-      <SidebarClient />
+      <SidebarClient hasBankToken={hasBankToken} />
 
       <form
         action={async () => {

@@ -16,6 +16,7 @@ type AgentFormProps = {
   agentId?: string;
   agent?: Agent;
   statusOnly?: boolean;
+  businessName?: string | null;
 };
 
 export default function AgentForm({
@@ -23,9 +24,12 @@ export default function AgentForm({
   agentId,
   agent,
   statusOnly = false,
+  businessName,
 }: AgentFormProps) {
   const router = useRouter();
   const isEdit = mode === "edit";
+  const resolvedBusinessName = isEdit ? agent?.businessName : businessName;
+  const canCreateAgent = mode !== "create" || Boolean(resolvedBusinessName);
 
   const [indemnityAccepted, setIndemnityAccepted] = useState(false);
 
@@ -35,6 +39,11 @@ export default function AgentForm({
         e.preventDefault();
 
         const formData = new FormData(e.currentTarget);
+
+        if (mode === "create" && !resolvedBusinessName) {
+          alert("Business name could not be resolved for your organization.");
+          return;
+        }
 
         if (mode === "create" && !indemnityAccepted) {
           alert("Please accept the indemnity before creating the agent.");
@@ -145,8 +154,21 @@ export default function AgentForm({
             name="business_name"
             label="Business Name"
             placeholder="Enter business name"
-            defaultValue={isEdit ? agent?.businessName : undefined}
+            defaultValue={resolvedBusinessName || undefined}
+            readOnly={mode === "create"}
+            helperText={
+              mode === "create"
+                ? "Sourced from your staff profile organization."
+                : undefined
+            }
           />
+
+          {mode === "create" && !resolvedBusinessName && (
+            <div className="md:col-span-2 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+              Business name could not be resolved from your staff profile.
+              Please contact an administrator before creating an agent.
+            </div>
+          )}
 
           <TextInput
             name="bvn"
@@ -211,7 +233,7 @@ export default function AgentForm({
       <div className="md:col-span-2">
         <button
           type="submit"
-          disabled={mode === "create" && !indemnityAccepted}
+          disabled={mode === "create" && (!indemnityAccepted || !canCreateAgent)}
           className="rounded-lg bg-black px-6 py-2 text-white disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
         >
           {statusOnly
