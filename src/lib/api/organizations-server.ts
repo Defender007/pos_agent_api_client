@@ -1,9 +1,10 @@
 import { cookies } from "next/headers";
 
+import { getServerApiBaseUrl } from "@/lib/api/api-config";
 import { parseApiError } from "@/lib/api/api-error";
 import type { Organization } from "@/lib/api/organizations";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE_URL = getServerApiBaseUrl();
 
 export type OrganizationAgent = {
   id: string;

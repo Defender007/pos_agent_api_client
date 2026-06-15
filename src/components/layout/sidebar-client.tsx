@@ -27,7 +27,12 @@ export default function SidebarClient({ hasBankToken }: SidebarClientProps) {
 
   return (
     <nav className="mt-10 flex flex-col gap-2">
-      <Link href="/dashboard" className={itemClass("/dashboard")}>
+      <Link
+        href={hasBankToken ? "/backoffice/dashboard" : "/dashboard"}
+        className={itemClass(
+          hasBankToken ? "/backoffice/dashboard" : "/dashboard",
+        )}
+      >
         <LayoutDashboard size={18} />
         Dashboard
       </Link>

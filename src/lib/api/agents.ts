@@ -1,8 +1,9 @@
 import { Agent } from "@/types/agent";
 import { cookies } from "next/headers";
 import { CreateAgentPayload } from "@/types/agent";
+import { getServerApiBaseUrl } from "@/lib/api/api-config";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE_URL = getServerApiBaseUrl();
 
 type AgentApiResponse = {
   success: boolean;

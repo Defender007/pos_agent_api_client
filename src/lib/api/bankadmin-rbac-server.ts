@@ -1,8 +1,9 @@
 import { cookies } from "next/headers";
 
+import { getServerApiBaseUrl } from "@/lib/api/api-config";
 import { parseApiError } from "@/lib/api/api-error";
 
-const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
+const API_BASE_URL = getServerApiBaseUrl();
 
 async function getBankAuthHeaders() {
   const cookieStore = await cookies();

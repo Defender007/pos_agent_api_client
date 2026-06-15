@@ -4,7 +4,7 @@ import type { NextRequest } from "next/server";
 const merchantProtectedRoutes = ["/dashboard", "/agents"];
 
 const bankProtectedRoutes = [
-  "/dashboard",
+  "/backoffice/dashboard",
   "/agents",
   "/organizations",
   "/staff",
@@ -50,6 +50,7 @@ export function middleware(request: NextRequest) {
 export const config = {
   matcher: [
     "/dashboard/:path*",
+    "/backoffice/dashboard/:path*",
     "/agents/:path*",
     "/organizations/:path*",
     "/staff/:path*",
