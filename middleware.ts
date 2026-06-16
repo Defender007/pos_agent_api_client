@@ -1,10 +1,11 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const merchantProtectedRoutes = ["/dashboard", "/agents"];
+const merchantProtectedRoutes = ["/dashboard", "/agents", "/change-password"];
 
 const bankProtectedRoutes = [
   "/backoffice/dashboard",
+  "/backoffice/change-password",
   "/agents/approvals",
   "/organizations",
   "/staff",
@@ -59,11 +60,19 @@ export function middleware(request: NextRequest) {
   }
 
   if (isBankProtectedRoute) {
-    return NextResponse.redirect(new URL("/backoffice/login", request.url));
+    const loginPath = pathname.startsWith("/backoffice/change-password")
+      ? "/backoffice/login?session=expired"
+      : "/backoffice/login";
+
+    return NextResponse.redirect(new URL(loginPath, request.url));
   }
 
   if (isMerchantProtectedRoute) {
-    return NextResponse.redirect(new URL("/login", request.url));
+    const loginPath = pathname.startsWith("/change-password")
+      ? "/login?session=expired"
+      : "/login";
+
+    return NextResponse.redirect(new URL(loginPath, request.url));
   }
 
   return NextResponse.next();
@@ -73,6 +82,8 @@ export const config = {
   matcher: [
     "/dashboard/:path*",
     "/backoffice/dashboard/:path*",
+    "/backoffice/change-password/:path*",
+    "/change-password/:path*",
     "/agents/:path*",
     "/organizations/:path*",
     "/staff/:path*",

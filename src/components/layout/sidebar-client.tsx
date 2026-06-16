@@ -9,6 +9,7 @@ import {
   UserCog,
   KeyRound,
   Building2,
+  LockKeyhole,
 } from "lucide-react";
 
 type SidebarClientProps = {
@@ -70,6 +71,16 @@ export default function SidebarClient({ hasBankToken }: SidebarClientProps) {
           </Link>
         </>
       )}
+
+      <Link
+        href={hasBankToken ? "/backoffice/change-password" : "/change-password"}
+        className={itemClass(
+          hasBankToken ? "/backoffice/change-password" : "/change-password",
+        )}
+      >
+        <LockKeyhole size={18} />
+        Change Password
+      </Link>
     </nav>
   );
 }
