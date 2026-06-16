@@ -14,6 +14,7 @@ import {
   getBankadminStaff,
 } from "@/lib/api/bankadmin-rbac-server";
 import { getOrganizations } from "@/lib/api/organizations-server";
+export const dynamic = "force-dynamic";
 
 type SummaryCardProps = {
   title: string;
