@@ -31,7 +31,14 @@ export default function HomePage() {
               href="/login"
               className="rounded-xl bg-amber-400 px-7 py-4 text-sm font-bold text-slate-950 shadow-lg hover:bg-amber-300"
             >
-              Staff Login
+              Merchant Staff Login
+            </Link>
+
+            <Link
+              href="/backoffice/login"
+              className="rounded-xl border border-white/20 bg-white/10 px-7 py-4 text-sm font-bold text-white hover:bg-white/20"
+            >
+              Bank Staff Login
             </Link>
 
             <Link
