@@ -85,7 +85,7 @@ export default function AgentApprovalActions({
           type="button"
           disabled={loadingAction !== null}
           onClick={() => void reviewAgent("approved", "KYC accepted")}
-          className="rounded-lg bg-emerald-600 px-3 py-2 text-xs font-semibold text-white transition hover:bg-emerald-700 disabled:cursor-not-allowed disabled:opacity-50"
+          className="rounded-lg bg-[#007A3D] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#005C2E] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {loadingAction === "approved" ? "Approving..." : "Approve"}
         </button>
@@ -100,7 +100,7 @@ export default function AgentApprovalActions({
         </button>
       </div>
 
-      {message && <p className="text-xs font-medium text-emerald-700">{message}</p>}
+      {message && <p className="text-xs font-medium text-[#005C2E]">{message}</p>}
       {error && <p className="text-xs font-medium text-red-600">{error}</p>}
     </div>
   );

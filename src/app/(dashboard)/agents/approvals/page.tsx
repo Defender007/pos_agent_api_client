@@ -41,8 +41,8 @@ function getOrganizationName(agent: BankAgent) {
 
 function statusPillClass(statusTone: "pending" | "approved" | "rejected") {
   const styles = {
-    pending: "bg-amber-100 text-amber-700",
-    approved: "bg-emerald-100 text-emerald-700",
+    pending: "bg-[#FFF7D6] text-[#7A5A00]",
+    approved: "bg-[#E6F4EC] text-[#005C2E]",
     rejected: "bg-red-100 text-red-700",
   };
 

@@ -26,6 +26,22 @@ function StatCard({
   );
 }
 
+function agentStatusClass(status: Agent["status"]) {
+  if (status === "active") {
+    return "bg-[#E6F4EC] text-[#005C2E]";
+  }
+
+  if (status === "pending") {
+    return "bg-[#FFF7D6] text-[#7A5A00]";
+  }
+
+  if (status === "suspended") {
+    return "bg-red-100 text-red-700";
+  }
+
+  return "bg-slate-100 text-slate-700";
+}
+
 export default async function DashboardPage() {
   let agents: Agent[] = [];
   let loadError: SectionErrorCardProps | null = null;
@@ -49,12 +65,12 @@ export default async function DashboardPage() {
 
   return (
     <PageContainer>
-      <div className="rounded-3xl bg-gradient-to-r from-slate-900 to-slate-700 p-8 text-white shadow-xl">
-        <p className="text-sm font-semibold text-amber-300">
+      <div className="rounded-3xl bg-gradient-to-r from-[#005C2E] to-[#007A3D] p-8 text-white shadow-xl">
+        <p className="text-sm font-semibold text-[#F9C80E]">
           SoftPOS Operations
         </p>
         <h1 className="mt-3 text-4xl font-black">Agent Management Dashboard</h1>
-        <p className="mt-3 max-w-2xl text-slate-300">
+        <p className="mt-3 max-w-2xl text-green-50">
           Monitor onboarding, KYC compliance, indemnity acceptance, and agent
           operational status.
         </p>
@@ -73,12 +89,12 @@ export default async function DashboardPage() {
         <StatCard
           title="Active Agents"
           value={activeAgents}
-          tone="bg-emerald-600 text-white"
+          tone="bg-[#007A3D] text-white"
         />
         <StatCard
           title="Pending Agents"
           value={pendingAgents}
-          tone="bg-amber-500 text-white"
+          tone="bg-[#F9C80E] text-[#0F172A]"
         />
         <StatCard
           title="Suspended Agents"
@@ -129,7 +145,9 @@ export default async function DashboardPage() {
                     {agent.businessName}
                   </td>
                   <td className="px-6 py-4">
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-bold capitalize text-slate-700">
+                    <span
+                      className={`rounded-full px-3 py-1 text-xs font-bold capitalize ${agentStatusClass(agent.status)}`}
+                    >
                       {agent.status}
                     </span>
                   </td>

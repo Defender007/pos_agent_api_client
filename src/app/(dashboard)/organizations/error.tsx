@@ -32,14 +32,14 @@ export default function OrganizationsError({
         {isSessionExpired ? (
           <Link
             href="/backoffice/login"
-            className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white"
+            className="rounded-xl bg-[#007A3D] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#005C2E]"
           >
             Backoffice Login
           </Link>
         ) : (
           <button
             onClick={() => reset()}
-            className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white"
+            className="rounded-xl bg-[#007A3D] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#005C2E]"
           >
             Retry
           </button>

@@ -31,7 +31,7 @@ export default async function PermissionsPage() {
 
         <Link
           href="/permissions/new"
-          className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+          className="rounded-xl bg-[#007A3D] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#005C2E]"
         >
           Create Permission
         </Link>

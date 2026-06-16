@@ -2,13 +2,10 @@ import Link from "next/link";
 
 export default function HomePage() {
   return (
-    <main className="min-h-screen bg-slate-950 px-6 py-10 text-white">
+    <main className="min-h-screen bg-gradient-to-br from-[#005C2E] via-[#007A3D] to-[#003F20] px-6 py-10 text-white">
       <section className="mx-auto grid min-h-[90vh] max-w-6xl items-center gap-12 lg:grid-cols-2">
         <div>
-          <div
-            className="mb-6 inline-flex rounded-full border border-white/10 bg-white/10 px-4 py-2 text-sm font-semibold text-amber-300"
-            style={{ color: "#7dd10f" }}
-          >
+          <div className="mb-6 inline-flex rounded-full border border-[#F9C80E]/40 bg-white/10 px-4 py-2 text-sm font-semibold text-[#F9C80E]">
             Fidelity Bank PLC • SoftPOS Merchant Portal
           </div>
 
@@ -17,10 +14,10 @@ export default function HomePage() {
             <br />
             KYC & compliance
             <br />
-            <span className="text-amber-400">in one portal.</span>
+            <span className="text-[#F9C80E]">in one portal.</span>
           </h1>
 
-          <p className="mt-7 max-w-2xl text-lg leading-8 text-slate-300">
+          <p className="mt-7 max-w-2xl text-lg leading-8 text-green-50">
             A secure management platform for onboarding SoftPOS agents,
             capturing KYC, enforcing digital indemnity acceptance, and managing
             operational status with RBAC-ready administration.
@@ -29,14 +26,21 @@ export default function HomePage() {
           <div className="mt-9 flex flex-wrap gap-4">
             <Link
               href="/login"
-              className="rounded-xl bg-amber-400 px-7 py-4 text-sm font-bold text-slate-950 shadow-lg hover:bg-amber-300"
+              className="rounded-xl bg-[#F9C80E] px-7 py-4 text-sm font-bold text-[#0F172A] shadow-lg transition hover:bg-[#FFE16A]"
             >
-              Staff Login
+              Merchant Staff Login
+            </Link>
+
+            <Link
+              href="/backoffice/login"
+              className="rounded-xl border border-white/25 bg-white/10 px-7 py-4 text-sm font-bold text-white transition hover:bg-white/20"
+            >
+              Bank Staff Login
             </Link>
 
             <Link
               href="/indemnity"
-              className="rounded-xl border border-white/20 bg-white/10 px-7 py-4 text-sm font-bold text-white hover:bg-white/20"
+              className="rounded-xl border border-white/25 bg-white/10 px-7 py-4 text-sm font-bold text-white transition hover:bg-white/20"
             >
               View Indemnity
             </Link>
@@ -47,11 +51,11 @@ export default function HomePage() {
           <div className="mb-6 flex items-center justify-between">
             <div className="flex gap-2">
               <span className="h-3 w-3 rounded-full bg-red-400" />
-              <span className="h-3 w-3 rounded-full bg-amber-400" />
-              <span className="h-3 w-3 rounded-full bg-green-400" />
+              <span className="h-3 w-3 rounded-full bg-[#F9C80E]" />
+              <span className="h-3 w-3 rounded-full bg-[#007A3D]" />
             </div>
 
-            <p className="text-sm font-semibold text-slate-300">
+            <p className="text-sm font-semibold text-green-50">
               Operations Dashboard
             </p>
           </div>
@@ -68,7 +72,9 @@ export default function HomePage() {
                 className="rounded-2xl bg-white p-5 text-slate-900"
               >
                 <p className="text-sm font-semibold text-slate-500">{label}</p>
-                <p className="mt-2 text-3xl font-black">{value}</p>
+                <p className="mt-2 text-3xl font-black text-[#005C2E]">
+                  {value}
+                </p>
               </div>
             ))}
           </div>
@@ -80,7 +86,7 @@ export default function HomePage() {
                 className="flex items-center justify-between border-b border-slate-200 py-3 last:border-0"
               >
                 <span className="font-medium">{code}</span>
-                <span className="rounded-full bg-amber-100 px-3 py-1 text-xs font-bold text-amber-700">
+                <span className="rounded-full bg-[#FFF7D6] px-3 py-1 text-xs font-bold text-[#7A5A00]">
                   Pending
                 </span>
               </div>

@@ -21,8 +21,8 @@ export default function SidebarClient({ hasBankToken }: SidebarClientProps) {
   const itemClass = (path: string) =>
     `group flex items-center gap-3 rounded-xl px-4 py-3 text-sm font-semibold transition ${
       pathname.startsWith(path)
-        ? "bg-slate-900 text-white shadow-lg"
-        : "text-slate-600 hover:bg-slate-100 hover:text-slate-900"
+        ? "bg-[#007A3D] text-white shadow-lg"
+        : "text-slate-600 hover:bg-[#E6F4EC] hover:text-[#005C2E]"
     }`;
 
   return (

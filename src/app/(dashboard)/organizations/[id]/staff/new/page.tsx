@@ -131,7 +131,7 @@ export default function NewOrganizationStaffPage() {
           </select>
         </div>
 
-        <div className="md:col-span-2 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+        <div className="md:col-span-2 rounded-xl border border-[#F9C80E]/40 bg-[#FFF7D6] p-4 text-sm text-[#7A5A00]">
           Default password: <strong>Pass123$*</strong>. User must change it at
           first login.
         </div>
@@ -140,7 +140,7 @@ export default function NewOrganizationStaffPage() {
           <button
             type="submit"
             disabled={loading}
-            className="rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white disabled:opacity-50"
+            className="rounded-xl bg-[#007A3D] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#005C2E] disabled:opacity-50"
           >
             {loading ? "Creating..." : "Create Merchant Staff"}
           </button>

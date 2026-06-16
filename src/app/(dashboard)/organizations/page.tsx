@@ -32,7 +32,7 @@ export default async function OrganizationsPage() {
 
         <Link
           href="/organizations/new"
-          className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+          className="rounded-xl bg-[#007A3D] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#005C2E]"
         >
           Create Organization
         </Link>
@@ -73,7 +73,7 @@ export default async function OrganizationsPage() {
                   <span
                     className={`rounded-full px-3 py-1 text-xs font-semibold ${
                       org.is_active
-                        ? "bg-green-100 text-green-700"
+                        ? "bg-[#E6F4EC] text-[#005C2E]"
                         : "bg-red-100 text-red-700"
                     }`}
                   >
