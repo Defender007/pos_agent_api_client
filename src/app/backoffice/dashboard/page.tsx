@@ -1,6 +1,8 @@
 import Link from "next/link";
-import { redirect } from "next/navigation";
 
+import SectionErrorCard, {
+  type SectionErrorCardProps,
+} from "@/components/common/section-error-card";
 import Sidebar from "@/components/layout/sidebar";
 import TopHeader from "@/components/layout/top-header";
 import {
@@ -13,6 +15,7 @@ import {
   getBankadminRoles,
   getBankadminStaff,
 } from "@/lib/api/bankadmin-rbac-server";
+import { getServerPageError } from "@/lib/api/server-page-error";
 import { getOrganizations } from "@/lib/api/organizations-server";
 export const dynamic = "force-dynamic";
 
@@ -35,38 +38,47 @@ function SummaryCard({ title, value, href, tone }: SummaryCardProps) {
   );
 }
 
-async function safeCount<T>(loader: () => Promise<T[]>): Promise<number> {
-  try {
-    const result = await loader();
-    return result.length;
-  } catch (error) {
-    if (error instanceof Error && error.message === "SESSION_EXPIRED") {
-      redirect("/backoffice/login?session=expired");
-    }
-
-    console.error("Backoffice dashboard summary failed:", error);
-    return 0;
-  }
-}
-
 export default async function BackofficeDashboardPage() {
-  const [
-    organizationsCount,
-    pendingAgentsCount,
-    approvedAgentsCount,
-    rejectedAgentsCount,
-    staffCount,
-    rolesCount,
-    permissionsCount,
-  ] = await Promise.all([
-    safeCount(getOrganizations),
-    safeCount(getPendingApprovalAgents),
-    safeCount(getApprovedAgents),
-    safeCount(getRejectedAgents),
-    safeCount(getBankadminStaff),
-    safeCount(getBankadminRoles),
-    safeCount(getBankadminPermissions),
-  ]);
+  let organizationsCount = 0;
+  let pendingAgentsCount = 0;
+  let approvedAgentsCount = 0;
+  let rejectedAgentsCount = 0;
+  let staffCount = 0;
+  let rolesCount = 0;
+  let permissionsCount = 0;
+  let loadError: SectionErrorCardProps | null = null;
+
+  try {
+    const [
+      organizations,
+      pendingAgents,
+      approvedAgents,
+      rejectedAgents,
+      staff,
+      roles,
+      permissions,
+    ] = await Promise.all([
+      getOrganizations(),
+      getPendingApprovalAgents(),
+      getApprovedAgents(),
+      getRejectedAgents(),
+      getBankadminStaff(),
+      getBankadminRoles(),
+      getBankadminPermissions(),
+    ]);
+
+    organizationsCount = organizations.length;
+    pendingAgentsCount = pendingAgents.length;
+    approvedAgentsCount = approvedAgents.length;
+    rejectedAgentsCount = rejectedAgents.length;
+    staffCount = staff.length;
+    rolesCount = roles.length;
+    permissionsCount = permissions.length;
+  } catch (error) {
+    loadError = getServerPageError(error, {
+      sessionExpiredRedirect: "/backoffice/login?session=expired",
+    });
+  }
 
   return (
     <div className="flex min-h-screen bg-slate-50">
@@ -89,6 +101,9 @@ export default async function BackofficeDashboardPage() {
             </p>
           </div>
 
+          {loadError ? (
+            <SectionErrorCard {...loadError} />
+          ) : (
           <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
             <SummaryCard
               title="Organizations"
@@ -139,6 +154,7 @@ export default async function BackofficeDashboardPage() {
               tone="bg-white text-slate-900"
             />
           </div>
+          )}
         </div>
       </main>
     </div>

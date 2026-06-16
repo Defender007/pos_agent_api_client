@@ -11,6 +11,16 @@ export default function BackofficeLoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sessionMessage] = useState(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    return new URLSearchParams(window.location.search).get("session") ===
+      "conflict"
+      ? "Another session type was detected. Please sign in again."
+      : null;
+  });
 
   async function handleSubmit(e: React.FormEvent<HTMLFormElement>) {
     e.preventDefault();
@@ -26,8 +36,9 @@ export default function BackofficeLoginPage() {
       document.cookie = `bank_access_token=${encodeURIComponent(
         response.data.access_token,
       )}; path=/; max-age=86400; SameSite=Lax`;
+      document.cookie = "access_token=; path=/; max-age=0; SameSite=Lax";
 
-      router.push("/organizations");
+      router.push("/backoffice/dashboard");
     } catch (error) {
       console.error(error);
       alert("Invalid credentials");
@@ -44,6 +55,12 @@ export default function BackofficeLoginPage() {
         <p className="mt-2 text-sm text-slate-500">
           Backoffice Administration Portal
         </p>
+
+        {sessionMessage && (
+          <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            {sessionMessage}
+          </div>
+        )}
 
         <form onSubmit={handleSubmit} className="mt-8 space-y-5">
           <div>

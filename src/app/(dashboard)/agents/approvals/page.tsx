@@ -1,6 +1,9 @@
 import { redirect } from "next/navigation";
 
 import AgentApprovalActions from "@/components/agents/agent-approval-actions";
+import SectionErrorCard, {
+  type SectionErrorCardProps,
+} from "@/components/common/section-error-card";
 import PageContainer from "@/components/layout/page-container";
 import PageTitle from "@/components/layout/page-title";
 import {
@@ -8,6 +11,7 @@ import {
   getPendingApprovalAgents,
   getRejectedAgents,
 } from "@/lib/api/bank-agents-server";
+import { getServerPageError } from "@/lib/api/server-page-error";
 import type { BankAgent } from "@/types/bank-agent";
 
 function getAgentName(agent: BankAgent) {
@@ -156,6 +160,7 @@ export default async function AgentApprovalsPage() {
   let pendingAgents: BankAgent[] = [];
   let approvedAgents: BankAgent[] = [];
   let rejectedAgents: BankAgent[] = [];
+  let loadError: SectionErrorCardProps | null = null;
 
   try {
     [pendingAgents, approvedAgents, rejectedAgents] = await Promise.all([
@@ -168,7 +173,9 @@ export default async function AgentApprovalsPage() {
       redirect("/backoffice/login?session=expired");
     }
 
-    throw error;
+    loadError = getServerPageError(error, {
+      sessionExpiredRedirect: "/backoffice/login?session=expired",
+    });
   }
 
   return (
@@ -178,6 +185,10 @@ export default async function AgentApprovalsPage() {
         description="Review agents pending bank approval"
       />
 
+      {loadError ? (
+        <SectionErrorCard {...loadError} />
+      ) : (
+        <>
       <AgentsTableSection
         title="Pending Approval Agents"
         description="Agents awaiting backoffice review"
@@ -202,6 +213,8 @@ export default async function AgentApprovalsPage() {
         emptyMessage="No rejected agents found."
         statusTone="rejected"
       />
+        </>
+      )}
     </PageContainer>
   );
 }

@@ -1,15 +1,21 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import SectionErrorCard, {
+  type SectionErrorCardProps,
+} from "@/components/common/section-error-card";
 import { getAgents } from "@/lib/api/agents";
+import { getServerPageError } from "@/lib/api/server-page-error";
 
 import PageContainer from "@/components/layout/page-container";
 import PageTitle from "@/components/layout/page-title";
 
 import AgentsTable from "@/components/agents/agents-table";
+import type { Agent } from "@/types/agent";
 
 export default async function AgentsPage() {
-  let agents = [];
+  let agents: Agent[] = [];
+  let loadError: SectionErrorCardProps | null = null;
 
   try {
     agents = await getAgents();
@@ -18,7 +24,9 @@ export default async function AgentsPage() {
       redirect("/login?session=expired");
     }
 
-    throw error;
+    loadError = getServerPageError(error, {
+      sessionExpiredRedirect: "/login?session=expired",
+    });
   }
 
   return (
@@ -34,7 +42,11 @@ export default async function AgentsPage() {
         </Link>
       </div>
 
-      <AgentsTable agents={agents} />
+      {loadError ? (
+        <SectionErrorCard {...loadError} />
+      ) : (
+        <AgentsTable agents={agents} />
+      )}
     </PageContainer>
   );
 }

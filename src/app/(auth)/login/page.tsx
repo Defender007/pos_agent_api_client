@@ -14,6 +14,16 @@ export default function LoginPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
+  const [sessionMessage] = useState(() => {
+    if (typeof window === "undefined") {
+      return null;
+    }
+
+    return new URLSearchParams(window.location.search).get("session") ===
+      "conflict"
+      ? "Another session type was detected. Please sign in again."
+      : null;
+  });
 
   return (
     <div className="flex min-h-screen items-center justify-center bg-gray-50 p-6">
@@ -25,6 +35,12 @@ export default function LoginPage() {
           />
 
           <SectionCard>
+            {sessionMessage && (
+              <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                {sessionMessage}
+              </div>
+            )}
+
             <form
               className="space-y-6"
               onSubmit={async (e) => {
@@ -41,6 +57,8 @@ export default function LoginPage() {
                   document.cookie = `access_token=${encodeURIComponent(
                     response.data.access_token,
                   )}; path=/; max-age=86400; SameSite=Lax`;
+                  document.cookie =
+                    "bank_access_token=; path=/; max-age=0; SameSite=Lax";
 
                   router.push("/dashboard");
                 } catch (error) {

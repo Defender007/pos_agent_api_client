@@ -5,7 +5,7 @@ const merchantProtectedRoutes = ["/dashboard", "/agents"];
 
 const bankProtectedRoutes = [
   "/backoffice/dashboard",
-  "/agents",
+  "/agents/approvals",
   "/organizations",
   "/staff",
   "/roles",
@@ -24,9 +24,31 @@ export function middleware(request: NextRequest) {
     pathname.startsWith(route),
   );
 
-  const isMerchantProtectedRoute = merchantProtectedRoutes.some((route) =>
-    pathname.startsWith(route),
-  );
+  const isMerchantProtectedRoute =
+    !isBankProtectedRoute &&
+    merchantProtectedRoutes.some((route) => pathname.startsWith(route));
+
+  if (
+    (isBankProtectedRoute || isMerchantProtectedRoute) &&
+    merchantToken &&
+    bankToken
+  ) {
+    const loginPath = isBankProtectedRoute ? "/backoffice/login" : "/login";
+    const response = NextResponse.redirect(
+      new URL(`${loginPath}?session=conflict`, request.url),
+    );
+
+    response.cookies.set("access_token", "", {
+      expires: new Date(0),
+      path: "/",
+    });
+    response.cookies.set("bank_access_token", "", {
+      expires: new Date(0),
+      path: "/",
+    });
+
+    return response;
+  }
 
   if (isBankProtectedRoute && bankToken) {
     return NextResponse.next();
