@@ -49,7 +49,7 @@ export default function BackofficeLoginPage() {
   }
 
   return (
-    <div className="min-h-screen bg-slate-100 p-6">
+    <div className="min-h-screen bg-[#F8FAFC] p-6">
       <div className="flex min-h-[calc(100vh-3rem)] items-center justify-center">
         <div className="w-full max-w-md rounded-2xl border bg-white p-8 shadow-sm">
           <h1 className="text-3xl font-bold text-slate-900">
@@ -61,7 +61,7 @@ export default function BackofficeLoginPage() {
           </p>
 
           {sessionMessage && (
-            <div className="mt-6 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            <div className="mt-6 rounded-xl border border-[#F9C80E]/40 bg-[#FFF7D6] p-4 text-sm text-[#7A5A00]">
               {sessionMessage}
             </div>
           )}
@@ -96,7 +96,7 @@ export default function BackofficeLoginPage() {
             <button
               type="submit"
               disabled={loading}
-              className="w-full rounded-xl bg-slate-900 px-4 py-3 font-semibold text-white"
+              className="w-full rounded-xl bg-[#007A3D] px-4 py-3 font-semibold text-white transition hover:bg-[#005C2E]"
             >
               {loading ? "Signing In..." : "Sign In"}
             </button>
@@ -109,14 +109,14 @@ export default function BackofficeLoginPage() {
               <div className="mt-4 grid gap-3 sm:grid-cols-2">
                 <Link
                   href="/"
-                  className="rounded-xl border border-slate-300 px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                  className="rounded-xl border border-[#BFDCCB] px-4 py-3 text-center text-sm font-semibold text-[#005C2E] transition hover:bg-[#E6F4EC]"
                 >
                   Home
                 </Link>
 
                 <Link
                   href="/login"
-                  className="rounded-xl bg-slate-900 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-800"
+                  className="rounded-xl bg-[#005C2E] px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-[#007A3D]"
                 >
                   Merchant Staff Login
                 </Link>

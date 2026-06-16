@@ -25,19 +25,21 @@ export default async function Sidebar() {
   return (
     <aside className="flex h-screen w-64 flex-col border-r border-slate-200 bg-white px-5 py-6 shadow-sm">
       <div>
-        <h1 className="text-3xl font-black tracking-tight text-slate-900">
+        <h1 className="text-3xl font-black tracking-tight text-[#005C2E]">
           SoftPOS
         </h1>
 
-        <p className="mt-2 text-sm text-slate-500">Operations Portal</p>
+        <p className="mt-2 text-sm font-semibold text-[#7A5A00]">
+          Fidelity Operations Portal
+        </p>
 
-        <div className="mt-5 rounded-2xl bg-slate-50 p-4">
-          <p className="truncate text-sm font-semibold text-slate-900">
+        <div className="mt-5 rounded-2xl border border-[#D6EBDD] bg-[#E6F4EC] p-4">
+          <p className="truncate text-sm font-semibold text-[#005C2E]">
             {email}
           </p>
 
           {roles.length > 0 && (
-            <p className="mt-1 truncate text-xs font-medium text-slate-500">
+            <p className="mt-1 truncate text-xs font-medium text-slate-600">
               {roles.join(", ")}
             </p>
           )}

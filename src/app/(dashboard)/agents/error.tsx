@@ -22,7 +22,7 @@ export default function DashboardError({ error, reset }: DashboardErrorProps) {
   return (
     <div className="flex min-h-screen items-center justify-center bg-slate-50 px-6">
       <div className="w-full max-w-xl rounded-3xl border bg-white p-8 text-center shadow-sm">
-        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-amber-100 text-2xl">
+        <div className="mx-auto flex h-14 w-14 items-center justify-center rounded-full bg-[#FFF7D6] text-2xl">
           ⚠️
         </div>
 
@@ -46,7 +46,7 @@ export default function DashboardError({ error, reset }: DashboardErrorProps) {
           <button
             type="button"
             onClick={reset}
-            className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+            className="rounded-xl bg-[#007A3D] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#005C2E]"
           >
             Retry
           </button>

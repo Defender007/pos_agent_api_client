@@ -33,7 +33,7 @@ export default async function RolesPage() {
 
         <Link
           href="/roles/new"
-          className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+          className="rounded-xl bg-[#007A3D] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#005C2E]"
         >
           Create Role
         </Link>
@@ -69,7 +69,7 @@ export default async function RolesPage() {
                 role.permissions.map((permission) => (
                   <span
                     key={permission}
-                    className="rounded-full bg-amber-100 px-3 py-1 text-xs font-semibold text-amber-700"
+                    className="rounded-full bg-[#FFF7D6] px-3 py-1 text-xs font-semibold text-[#7A5A00]"
                   >
                     {permission}
                   </span>

@@ -21,6 +21,27 @@ type Props = {
   }>;
 };
 
+function statusPillClass(status?: string | null) {
+  const normalizedStatus = status?.toLowerCase();
+
+  if (normalizedStatus === "active" || normalizedStatus === "approved") {
+    return "bg-[#E6F4EC] text-[#005C2E]";
+  }
+
+  if (
+    normalizedStatus === "pending" ||
+    normalizedStatus === "pending_approval"
+  ) {
+    return "bg-[#FFF7D6] text-[#7A5A00]";
+  }
+
+  if (normalizedStatus === "rejected" || normalizedStatus === "suspended") {
+    return "bg-red-100 text-red-700";
+  }
+
+  return "bg-slate-100 text-slate-700";
+}
+
 export default async function OrganizationDetailPage({ params }: Props) {
   const { id } = await params;
 
@@ -123,7 +144,7 @@ export default async function OrganizationDetailPage({ params }: Props) {
 
           <Link
             href={`/organizations/${id}/staff/new`}
-            className="rounded-xl bg-slate-900 px-5 py-3 text-sm font-semibold text-white transition hover:bg-slate-800"
+            className="rounded-xl bg-[#007A3D] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#005C2E]"
           >
             Create Merchant Staff
           </Link>
@@ -181,7 +202,7 @@ export default async function OrganizationDetailPage({ params }: Props) {
                     <td className="px-6 py-4 text-sm">
                       <Link
                         href={`/organizations/${id}/staff/${member.id}/edit`}
-                        className="font-semibold text-blue-600 hover:text-blue-800"
+                        className="font-semibold text-[#007A3D] hover:text-[#005C2E]"
                       >
                         Edit
                       </Link>
@@ -265,7 +286,9 @@ export default async function OrganizationDetailPage({ params }: Props) {
                       </td>
 
                       <td className="px-6 py-4 text-sm">
-                        <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold text-slate-700">
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-semibold ${statusPillClass(agent.status)}`}
+                        >
                           {agent.status || "—"}
                         </span>
                       </td>

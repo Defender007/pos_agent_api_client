@@ -219,7 +219,7 @@ export default function AgentForm({
           />
 
           {mode === "create" && !resolvedBusinessName && (
-            <div className="md:col-span-2 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+            <div className="md:col-span-2 rounded-lg border border-[#F9C80E]/40 bg-[#FFF7D6] p-4 text-sm text-[#7A5A00]">
               Business name could not be resolved from your staff profile.
               Please contact an administrator before creating an agent.
             </div>
@@ -275,7 +275,7 @@ export default function AgentForm({
                   type="button"
                   onClick={captureCurrentLocation}
                   disabled={locationLoading}
-                  className="rounded-lg bg-slate-900 px-4 py-2 text-sm font-semibold text-white disabled:cursor-not-allowed disabled:opacity-50"
+                  className="rounded-lg bg-[#007A3D] px-4 py-2 text-sm font-semibold text-white transition hover:bg-[#005C2E] disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   {locationLoading ? "Getting location..." : "Use Current Location"}
                 </button>
@@ -359,7 +359,7 @@ export default function AgentForm({
         <button
           type="submit"
           disabled={mode === "create" && (!indemnityAccepted || !canCreateAgent)}
-          className="rounded-lg bg-black px-6 py-2 text-white disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
+          className="rounded-lg bg-[#007A3D] px-6 py-2 font-semibold text-white transition hover:bg-[#005C2E] disabled:cursor-not-allowed disabled:bg-gray-300 disabled:text-gray-500"
         >
           {statusOnly
             ? "Update Status"

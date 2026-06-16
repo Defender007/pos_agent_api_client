@@ -27,7 +27,7 @@ export default function LoginPage() {
   });
 
   return (
-    <div className="min-h-screen bg-gray-50 p-6">
+    <div className="min-h-screen bg-[#F8FAFC] p-6">
       <div className="flex min-h-[calc(100vh-3rem)] items-center justify-center">
         <div className="w-full max-w-md">
           <PageContainer>
@@ -38,7 +38,7 @@ export default function LoginPage() {
 
             <SectionCard>
               {sessionMessage && (
-                <div className="mb-6 rounded-lg border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
+                <div className="mb-6 rounded-lg border border-[#F9C80E]/40 bg-[#FFF7D6] p-4 text-sm text-[#7A5A00]">
                   {sessionMessage}
                 </div>
               )}
@@ -99,7 +99,7 @@ export default function LoginPage() {
                   />
                 </div>
 
-                <button className="w-full rounded-lg bg-black px-4 py-2 text-white">
+                <button className="w-full rounded-lg bg-[#007A3D] px-4 py-2 font-semibold text-white transition hover:bg-[#005C2E]">
                   {loading ? "Signing In..." : "Sign In"}
                 </button>
 
@@ -111,14 +111,14 @@ export default function LoginPage() {
                   <div className="mt-4 grid gap-3 sm:grid-cols-2">
                     <Link
                       href="/"
-                      className="rounded-xl border border-slate-300 px-4 py-3 text-center text-sm font-semibold text-slate-700 transition hover:bg-slate-100"
+                      className="rounded-xl border border-[#BFDCCB] px-4 py-3 text-center text-sm font-semibold text-[#005C2E] transition hover:bg-[#E6F4EC]"
                     >
                       Home
                     </Link>
 
                     <Link
                       href="/backoffice/login"
-                      className="rounded-xl bg-slate-900 px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-slate-800"
+                      className="rounded-xl bg-[#005C2E] px-4 py-3 text-center text-sm font-semibold text-white transition hover:bg-[#007A3D]"
                     >
                       Bank Staff Login
                     </Link>

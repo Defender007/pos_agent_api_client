@@ -88,14 +88,14 @@ export default async function BackofficeDashboardPage() {
         <TopHeader />
 
         <div className="space-y-6 p-8">
-          <div className="rounded-3xl bg-gradient-to-r from-slate-900 to-slate-700 p-8 text-white shadow-xl">
-            <p className="text-sm font-semibold text-amber-300">
+          <div className="rounded-3xl bg-gradient-to-r from-[#005C2E] to-[#007A3D] p-8 text-white shadow-xl">
+            <p className="text-sm font-semibold text-[#F9C80E]">
               Bank Staff Backoffice
             </p>
 
             <h1 className="mt-3 text-4xl font-black">Backoffice Dashboard</h1>
 
-            <p className="mt-3 max-w-2xl text-slate-300">
+            <p className="mt-3 max-w-2xl text-green-50">
               Monitor organizations, agent approvals, and backoffice access
               administration.
             </p>
@@ -116,14 +116,14 @@ export default async function BackofficeDashboardPage() {
               title="Pending Approval Agents"
               value={pendingAgentsCount}
               href="/agents/approvals"
-              tone="bg-amber-500 text-white"
+              tone="bg-[#F9C80E] text-[#0F172A]"
             />
 
             <SummaryCard
               title="Approved Agents"
               value={approvedAgentsCount}
               href="/agents/approvals"
-              tone="bg-emerald-600 text-white"
+              tone="bg-[#007A3D] text-white"
             />
 
             <SummaryCard

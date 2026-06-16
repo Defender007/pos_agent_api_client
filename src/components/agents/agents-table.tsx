@@ -47,14 +47,14 @@ export default function AgentsTable({ agents }: AgentsTableProps) {
               <div className="flex gap-2">
                 <Link
                   href={`/agents/${agent.id}`}
-                  className="rounded-md border px-3 py-1 text-sm hover:bg-gray-100"
+                  className="rounded-md border border-[#BFDCCB] px-3 py-1 text-sm font-medium text-[#005C2E] hover:bg-[#E6F4EC]"
                 >
                   View
                 </Link>
 
                 <Link
                   href={`/agents/${agent.id}/edit`}
-                  className="rounded-md border px-3 py-1 text-sm hover:bg-gray-100"
+                  className="rounded-md border border-[#BFDCCB] px-3 py-1 text-sm font-medium text-[#005C2E] hover:bg-[#E6F4EC]"
                 >
                   Edit
                 </Link>

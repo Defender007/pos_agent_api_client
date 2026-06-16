@@ -15,9 +15,9 @@ export default function TopHeader() {
 
   return (
     <header className="sticky top-0 z-10 border-b border-slate-200 bg-white/90 px-8 py-5 backdrop-blur">
-      <h2 className="text-xl font-bold text-slate-900">{getTitle(pathname)}</h2>
+      <h2 className="text-xl font-bold text-[#005C2E]">{getTitle(pathname)}</h2>
 
-      <p className="mt-1 text-sm text-slate-500">
+      <p className="mt-1 text-sm text-slate-600">
         Secure SoftPOS agent operations and compliance workspace
       </p>
     </header>

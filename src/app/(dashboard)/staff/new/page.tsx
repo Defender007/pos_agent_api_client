@@ -82,7 +82,7 @@ export default function NewStaffPage() {
         <div className="md:col-span-2">
           <button
             disabled={loading}
-            className="rounded-xl bg-slate-900 px-6 py-3 text-sm font-semibold text-white disabled:opacity-50"
+            className="rounded-xl bg-[#007A3D] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#005C2E] disabled:opacity-50"
           >
             {loading ? "Creating..." : "Create Staff"}
           </button>
