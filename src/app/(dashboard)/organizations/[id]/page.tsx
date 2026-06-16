@@ -2,12 +2,18 @@ import PageContainer from "@/components/layout/page-container";
 import PageTitle from "@/components/layout/page-title";
 import Link from "next/link";
 
+import SectionErrorCard, {
+  type SectionErrorCardProps,
+} from "@/components/common/section-error-card";
 import {
   getOrganization,
   getOrganizationAgents,
   getOrganizationStaff,
+  type OrganizationAgent,
+  type OrganizationDetail,
   type OrganizationStaffMember,
 } from "@/lib/api/organizations-server";
+import { getServerPageError } from "@/lib/api/server-page-error";
 
 type Props = {
   params: Promise<{
@@ -18,16 +24,40 @@ type Props = {
 export default async function OrganizationDetailPage({ params }: Props) {
   const { id } = await params;
 
-  const [organization, staff, agents] = await Promise.all([
-    getOrganization(id),
-    getOrganizationStaff(id),
-    getOrganizationAgents(id),
-  ]);
+  let organization: OrganizationDetail | null = null;
+  let staff: OrganizationStaffMember[] = [];
+  let agents: OrganizationAgent[] = [];
+  let loadError: SectionErrorCardProps | null = null;
+
+  try {
+    [organization, staff, agents] = await Promise.all([
+      getOrganization(id),
+      getOrganizationStaff(id),
+      getOrganizationAgents(id),
+    ]);
+  } catch (error) {
+    loadError = getServerPageError(error, {
+      sessionExpiredRedirect: "/backoffice/login?session=expired",
+    });
+  }
 
   return (
     <PageContainer>
-      <PageTitle title={organization.name} description="Organization Details" />
+      <PageTitle
+        title={organization?.name || "Organization Details"}
+        description="Organization Details"
+      />
 
+      {loadError || !organization ? (
+        <SectionErrorCard
+          {...(loadError || {
+            title: "Unable to load this section",
+            message:
+              "The organization details could not be loaded. Please try again.",
+          })}
+        />
+      ) : (
+        <>
       <div className="mt-6 grid gap-6 md:grid-cols-2">
         <div className="rounded-2xl border bg-white p-6 shadow-sm">
           <h2 className="mb-4 text-lg font-bold">Organization Information</h2>
@@ -247,6 +277,8 @@ export default async function OrganizationDetailPage({ params }: Props) {
           </div>
         )}
       </div>
+        </>
+      )}
     </PageContainer>
   );
 }

@@ -1,12 +1,26 @@
 import Link from "next/link";
 
 import { getOrganizations } from "@/lib/api/organizations-server";
+import type { Organization } from "@/lib/api/organizations";
 
+import SectionErrorCard, {
+  type SectionErrorCardProps,
+} from "@/components/common/section-error-card";
 import PageContainer from "@/components/layout/page-container";
 import PageTitle from "@/components/layout/page-title";
+import { getServerPageError } from "@/lib/api/server-page-error";
 
 export default async function OrganizationsPage() {
-  const organizations = await getOrganizations();
+  let organizations: Organization[] = [];
+  let loadError: SectionErrorCardProps | null = null;
+
+  try {
+    organizations = await getOrganizations();
+  } catch (error) {
+    loadError = getServerPageError(error, {
+      sessionExpiredRedirect: "/backoffice/login?session=expired",
+    });
+  }
 
   return (
     <PageContainer>
@@ -24,6 +38,9 @@ export default async function OrganizationsPage() {
         </Link>
       </div>
 
+      {loadError ? (
+        <SectionErrorCard {...loadError} />
+      ) : (
       <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
         <table className="w-full">
           <thead className="bg-slate-50">
@@ -77,6 +94,7 @@ export default async function OrganizationsPage() {
           </tbody>
         </table>
       </div>
+      )}
     </PageContainer>
   );
 }

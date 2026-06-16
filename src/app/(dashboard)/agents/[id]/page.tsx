@@ -1,8 +1,13 @@
 import { getAgentById } from "@/lib/api/agents";
+import SectionErrorCard, {
+  type SectionErrorCardProps,
+} from "@/components/common/section-error-card";
 import PageContainer from "@/components/layout/page-container";
 import PageTitle from "@/components/layout/page-title";
 import SectionCard from "@/components/ui/custom/section-card";
 import StatusBadge from "@/components/ui/custom/status-badge";
+import { getServerPageError } from "@/lib/api/server-page-error";
+import type { Agent } from "@/types/agent";
 
 type AgentDetailsPageProps = {
   params: Promise<{ id: string }>;
@@ -27,7 +32,34 @@ export default async function AgentDetailsPage({
   params,
 }: AgentDetailsPageProps) {
   const { id } = await params;
-  const agent = await getAgentById(id);
+  let agent: Agent | null = null;
+  let loadError: SectionErrorCardProps | null = null;
+
+  try {
+    agent = await getAgentById(id);
+  } catch (error) {
+    loadError = getServerPageError(error, {
+      sessionExpiredRedirect: "/login?session=expired",
+    });
+  }
+
+  if (loadError || !agent) {
+    return (
+      <PageContainer>
+        <PageTitle
+          title="Agent Details"
+          description="Complete agent and KYC profile"
+        />
+        <SectionErrorCard
+          {...(loadError || {
+            title: "Unable to load this section",
+            message: "The agent details could not be loaded. Please try again.",
+          })}
+        />
+      </PageContainer>
+    );
+  }
+
   const address = agent.address ?? agent.location?.address;
   const latitude = agent.latitude ?? agent.location?.latitude;
   const longitude = agent.longitude ?? agent.location?.longitude;

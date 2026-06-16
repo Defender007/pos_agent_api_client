@@ -1,12 +1,28 @@
 import Link from "next/link";
 
-import { getBankadminPermissions } from "@/lib/api/bankadmin-rbac-server";
+import {
+  getBankadminPermissions,
+  type BankadminPermission,
+} from "@/lib/api/bankadmin-rbac-server";
 
+import SectionErrorCard, {
+  type SectionErrorCardProps,
+} from "@/components/common/section-error-card";
 import PageContainer from "@/components/layout/page-container";
 import PageTitle from "@/components/layout/page-title";
+import { getServerPageError } from "@/lib/api/server-page-error";
 
 export default async function PermissionsPage() {
-  const permissions = await getBankadminPermissions();
+  let permissions: BankadminPermission[] = [];
+  let loadError: SectionErrorCardProps | null = null;
+
+  try {
+    permissions = await getBankadminPermissions();
+  } catch (error) {
+    loadError = getServerPageError(error, {
+      sessionExpiredRedirect: "/backoffice/login?session=expired",
+    });
+  }
 
   return (
     <PageContainer>
@@ -21,6 +37,9 @@ export default async function PermissionsPage() {
         </Link>
       </div>
 
+      {loadError ? (
+        <SectionErrorCard {...loadError} />
+      ) : (
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {permissions.map((permission) => (
           <div
@@ -37,6 +56,7 @@ export default async function PermissionsPage() {
           </div>
         ))}
       </div>
+      )}
     </PageContainer>
   );
 }

@@ -2,7 +2,9 @@
 
 import { useParams, useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
+import { Toaster } from "@/components/ui/sonner";
 import { createOrganizationStaff } from "@/lib/api/organizations";
 
 export default function NewOrganizationStaffPage() {
@@ -32,39 +34,68 @@ export default function NewOrganizationStaffPage() {
           const formData = new FormData(e.currentTarget);
 
           try {
+            const email = String(formData.get("email") || "").trim();
+            const firstName = String(formData.get("first_name") || "").trim();
+            const lastName = String(formData.get("last_name") || "").trim();
+
+            if (!email || !firstName || !lastName) {
+              toast.error("Please complete all required staff details.");
+              return;
+            }
+
             await createOrganizationStaff(organizationId, {
-              email: String(formData.get("email")),
-              role: String(formData.get("role")),
+              email,
+              role: "admin",
               profile: {
-                first_name: String(formData.get("first_name")),
-                last_name: String(formData.get("last_name")),
+                first_name: firstName,
+                last_name: lastName,
                 middle_name: String(formData.get("middle_name") || ""),
-                designation: String(formData.get("designation") || ""),
+                designation: "Admin",
                 staff_id: String(formData.get("staff_id") || ""),
                 phone: String(formData.get("phone") || ""),
               },
             });
 
-            alert(
-              "Merchant Staff created successfully. Default password is Pass123$* and must be changed at first login.",
+            toast.success(
+              "Merchant staff created. Default password is Pass123$* and must be changed at first login.",
             );
 
-            router.push(`/organizations/${organizationId}`);
+            setTimeout(() => {
+              router.push(`/organizations/${organizationId}`);
+            }, 800);
           } catch (error) {
             console.error(error);
-            alert("Failed to create merchant staff");
+            toast.error(
+              error instanceof Error
+                ? error.message
+                : "Failed to create merchant staff.",
+            );
           } finally {
             setLoading(false);
           }
         }}
       >
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-slate-700">
+            Role
+          </label>
+
+          <input type="hidden" name="role" value="admin" />
+
+          <select
+            value="admin"
+            disabled
+            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-700 outline-none"
+          >
+            <option value="admin">admin</option>
+          </select>
+        </div>
+
         {[
           ["email", "Email"],
-          ["role", "Role"],
           ["first_name", "First Name"],
           ["last_name", "Last Name"],
           ["middle_name", "Middle Name"],
-          ["designation", "Designation"],
           ["staff_id", "Staff ID"],
           ["phone", "Phone"],
         ].map(([name, label]) => (
@@ -84,6 +115,22 @@ export default function NewOrganizationStaffPage() {
           </div>
         ))}
 
+        <div>
+          <label className="mb-2 block text-sm font-semibold text-slate-700">
+            Designation
+          </label>
+
+          <input type="hidden" name="designation" value="Admin" />
+
+          <select
+            value="Admin"
+            disabled
+            className="w-full rounded-xl border border-slate-300 bg-slate-50 px-4 py-3 text-slate-700 outline-none"
+          >
+            <option value="Admin">Admin</option>
+          </select>
+        </div>
+
         <div className="md:col-span-2 rounded-xl border border-amber-200 bg-amber-50 p-4 text-sm text-amber-800">
           Default password: <strong>Pass123$*</strong>. User must change it at
           first login.
@@ -99,6 +146,8 @@ export default function NewOrganizationStaffPage() {
           </button>
         </div>
       </form>
+
+      <Toaster richColors />
     </div>
   );
 }

@@ -1,6 +1,11 @@
 import { redirect } from "next/navigation";
+import SectionErrorCard, {
+  type SectionErrorCardProps,
+} from "@/components/common/section-error-card";
 import { getAgents } from "@/lib/api/agents";
 import PageContainer from "@/components/layout/page-container";
+import { getServerPageError } from "@/lib/api/server-page-error";
+import type { Agent } from "@/types/agent";
 
 function StatCard({
   title,
@@ -22,7 +27,8 @@ function StatCard({
 }
 
 export default async function DashboardPage() {
-  let agents = [];
+  let agents: Agent[] = [];
+  let loadError: SectionErrorCardProps | null = null;
 
   try {
     agents = await getAgents();
@@ -30,7 +36,9 @@ export default async function DashboardPage() {
     if (error instanceof Error && error.message === "SESSION_EXPIRED") {
       redirect("/login?session=expired");
     }
-    throw error;
+    loadError = getServerPageError(error, {
+      sessionExpiredRedirect: "/login?session=expired",
+    });
   }
 
   const totalAgents = agents.length;
@@ -52,6 +60,10 @@ export default async function DashboardPage() {
         </p>
       </div>
 
+      {loadError ? (
+        <SectionErrorCard {...loadError} />
+      ) : (
+        <>
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-4">
         <StatCard
           title="Total Agents"
@@ -127,6 +139,8 @@ export default async function DashboardPage() {
           </table>
         </div>
       </div>
+        </>
+      )}
     </PageContainer>
   );
 }

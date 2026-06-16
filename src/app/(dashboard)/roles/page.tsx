@@ -1,11 +1,27 @@
-import { getBankadminRoles } from "@/lib/api/bankadmin-rbac-server";
+import {
+  getBankadminRoles,
+  type BankadminRole,
+} from "@/lib/api/bankadmin-rbac-server";
 import Link from "next/link";
 
+import SectionErrorCard, {
+  type SectionErrorCardProps,
+} from "@/components/common/section-error-card";
 import PageContainer from "@/components/layout/page-container";
 import PageTitle from "@/components/layout/page-title";
+import { getServerPageError } from "@/lib/api/server-page-error";
 
 export default async function RolesPage() {
-  const roles = await getBankadminRoles();
+  let roles: BankadminRole[] = [];
+  let loadError: SectionErrorCardProps | null = null;
+
+  try {
+    roles = await getBankadminRoles();
+  } catch (error) {
+    loadError = getServerPageError(error, {
+      sessionExpiredRedirect: "/backoffice/login?session=expired",
+    });
+  }
 
   return (
     <PageContainer>
@@ -23,6 +39,9 @@ export default async function RolesPage() {
         </Link>
       </div>
 
+      {loadError ? (
+        <SectionErrorCard {...loadError} />
+      ) : (
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
         {roles.map((role) => (
           <div
@@ -64,6 +83,7 @@ export default async function RolesPage() {
           </div>
         ))}
       </div>
+      )}
     </PageContainer>
   );
 }
