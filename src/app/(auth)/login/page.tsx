@@ -3,11 +3,13 @@
 import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
+import { toast } from "sonner";
 import { loginStaff } from "@/lib/api/auth";
 
 import PageContainer from "@/components/layout/page-container";
 import PageTitle from "@/components/layout/page-title";
 import SectionCard from "@/components/ui/custom/section-card";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function LoginPage() {
   const router = useRouter();
@@ -64,7 +66,9 @@ export default function LoginPage() {
 
                     router.push("/dashboard");
                   } catch (error) {
-                    alert("Login failed");
+                    toast.error(
+                      error instanceof Error ? error.message : "Login failed",
+                    );
                     console.error(error);
                   } finally {
                     setLoading(false);
@@ -129,6 +133,7 @@ export default function LoginPage() {
           </PageContainer>
         </div>
       </div>
+      <Toaster richColors />
     </div>
   );
 }

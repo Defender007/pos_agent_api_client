@@ -3,8 +3,10 @@
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { loginBankStaff } from "@/lib/api/bank-auth";
+import { Toaster } from "@/components/ui/sonner";
 
 export default function BackofficeLoginPage() {
   const router = useRouter();
@@ -42,7 +44,9 @@ export default function BackofficeLoginPage() {
       router.push("/backoffice/dashboard");
     } catch (error) {
       console.error(error);
-      alert("Invalid credentials");
+      toast.error(
+        error instanceof Error ? error.message : "Invalid credentials",
+      );
     } finally {
       setLoading(false);
     }
@@ -125,6 +129,7 @@ export default function BackofficeLoginPage() {
           </form>
         </div>
       </div>
+      <Toaster richColors />
     </div>
   );
 }
