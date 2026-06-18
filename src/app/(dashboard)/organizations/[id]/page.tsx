@@ -14,6 +14,7 @@ import {
   type OrganizationStaffMember,
 } from "@/lib/api/organizations-server";
 import { getServerPageError } from "@/lib/api/server-page-error";
+import { getBusinessSegmentLabel } from "@/lib/business-segments";
 
 type Props = {
   params: Promise<{
@@ -40,6 +41,12 @@ function statusPillClass(status?: string | null) {
   }
 
   return "bg-slate-100 text-slate-700";
+}
+
+function agentTypePillClass(agentType?: string | null) {
+  return agentType === "solopreneur"
+    ? "bg-[#FFF7D6] text-[#005C2E]"
+    : "bg-slate-100 text-slate-700";
 }
 
 export default async function OrganizationDetailPage({ params }: Props) {
@@ -106,6 +113,21 @@ export default async function OrganizationDetailPage({ params }: Props) {
             </p>
 
             <p>
+              <strong>Organization Type:</strong>{" "}
+              {organization.is_system ||
+              organization.organization_type === "solopreneur_system"
+                ? "Solopreneur System"
+                : "Standard"}
+            </p>
+
+            <p>
+              <strong>Business Segment:</strong>{" "}
+              {organization.business_segment === "others"
+                ? organization.business_segment_other || "Others"
+                : getBusinessSegmentLabel(organization.business_segment)}
+            </p>
+
+            <p>
               <strong>Status:</strong> {organization.status}
             </p>
           </div>
@@ -142,12 +164,19 @@ export default async function OrganizationDetailPage({ params }: Props) {
             </p>
           </div>
 
-          <Link
-            href={`/organizations/${id}/staff/new`}
-            className="rounded-xl bg-[#007A3D] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#005C2E]"
-          >
-            Create Merchant Staff
-          </Link>
+          {organization.is_system ||
+          organization.organization_type === "solopreneur_system" ? (
+            <span className="rounded-xl bg-[#FFF7D6] px-4 py-3 text-sm font-semibold text-[#7A5A00]">
+              System organization
+            </span>
+          ) : (
+            <Link
+              href={`/organizations/${id}/staff/new`}
+              className="rounded-xl bg-[#007A3D] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#005C2E]"
+            >
+              Create Merchant Staff
+            </Link>
+          )}
         </div>
 
         <div className="overflow-hidden rounded-xl border">
@@ -241,6 +270,7 @@ export default async function OrganizationDetailPage({ params }: Props) {
                     "Business Name",
                     "Phone",
                     "Email",
+                    "Agent Type",
                     "TID",
                     "Status",
                   ].map((h) => (
@@ -279,6 +309,16 @@ export default async function OrganizationDetailPage({ params }: Props) {
 
                       <td className="px-6 py-4 text-sm text-slate-700">
                         {agent.email || "—"}
+                      </td>
+
+                      <td className="px-6 py-4 text-sm">
+                        <span
+                          className={`rounded-full px-3 py-1 text-xs font-semibold ${agentTypePillClass(agent.agent_type)}`}
+                        >
+                          {agent.agent_type === "solopreneur"
+                            ? "Solopreneur Agent"
+                            : "Standard Agent"}
+                        </span>
                       </td>
 
                       <td className="px-6 py-4 text-sm text-slate-700">

@@ -1,4 +1,5 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
 import AgentApprovalActions from "@/components/agents/agent-approval-actions";
 import SectionErrorCard, {
@@ -49,6 +50,22 @@ function statusPillClass(statusTone: "pending" | "approved" | "rejected") {
   return `rounded-full px-3 py-1 text-xs font-semibold ${styles[statusTone]}`;
 }
 
+function AgentTypeBadge({ agentType }: { agentType?: string | null }) {
+  const isSolopreneur = agentType === "solopreneur";
+
+  return (
+    <span
+      className={`rounded-full px-3 py-1 text-xs font-semibold ${
+        isSolopreneur
+          ? "bg-[#FFF7D6] text-[#005C2E]"
+          : "bg-slate-100 text-slate-700"
+      }`}
+    >
+      {isSolopreneur ? "Solopreneur Agent" : "Standard Agent"}
+    </span>
+  );
+}
+
 function AgentsTableSection({
   title,
   description,
@@ -71,6 +88,7 @@ function AgentsTableSection({
     "Phone",
     "Email",
     "Organization",
+    "Agent Type",
     "TID",
     "Status",
     ...(showActions ? ["Actions"] : []),
@@ -131,6 +149,10 @@ function AgentsTableSection({
                     {getOrganizationName(agent)}
                   </td>
 
+                  <td className="px-6 py-4 text-sm">
+                    <AgentTypeBadge agentType={agent.agent_type} />
+                  </td>
+
                   <td className="px-6 py-4 text-sm text-slate-700">
                     {agent.tid || "—"}
                   </td>
@@ -180,10 +202,19 @@ export default async function AgentApprovalsPage() {
 
   return (
     <PageContainer>
-      <PageTitle
-        title="Agent Approvals"
-        description="Review agents pending bank approval"
-      />
+      <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+        <PageTitle
+          title="Agent Approvals"
+          description="Review agents pending bank approval"
+        />
+
+        <Link
+          href="/backoffice/agents/solopreneur/new"
+          className="rounded-xl bg-[#007A3D] px-5 py-3 text-center text-sm font-semibold text-white transition hover:bg-[#005C2E]"
+        >
+          Create Solopreneur Agent
+        </Link>
+      </div>
 
       {loadError ? (
         <SectionErrorCard {...loadError} />

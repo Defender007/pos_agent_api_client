@@ -6,6 +6,7 @@ const merchantProtectedRoutes = ["/dashboard", "/agents", "/change-password"];
 const bankProtectedRoutes = [
   "/backoffice/dashboard",
   "/backoffice/change-password",
+  "/backoffice/agents",
   "/agents/approvals",
   "/organizations",
   "/staff",
@@ -60,7 +61,9 @@ export function middleware(request: NextRequest) {
   }
 
   if (isBankProtectedRoute) {
-    const loginPath = pathname.startsWith("/backoffice/change-password")
+    const loginPath =
+      pathname.startsWith("/backoffice/change-password") ||
+      pathname.startsWith("/backoffice/agents")
       ? "/backoffice/login?session=expired"
       : "/backoffice/login";
 
@@ -83,6 +86,7 @@ export const config = {
     "/dashboard/:path*",
     "/backoffice/dashboard/:path*",
     "/backoffice/change-password/:path*",
+    "/backoffice/agents/:path*",
     "/change-password/:path*",
     "/agents/:path*",
     "/organizations/:path*",

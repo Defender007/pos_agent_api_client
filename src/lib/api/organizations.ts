@@ -1,4 +1,5 @@
 import { parseApiError } from "@/lib/api/api-error";
+import type { BusinessSegment } from "@/lib/business-segments";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -18,6 +19,10 @@ export type Organization = {
   contact_email: string | null;
   contact_phone: string | null;
   address: string | null;
+  organization_type?: "standard" | "solopreneur_system" | null;
+  is_system?: boolean;
+  business_segment?: BusinessSegment | null;
+  business_segment_other?: string | null;
   status: string;
   is_active: boolean;
   created_at: string;
@@ -31,6 +36,9 @@ export async function createOrganization(payload: {
   contact_email?: string;
   contact_phone?: string;
   address?: string;
+  organization_type?: "standard";
+  business_segment: BusinessSegment;
+  business_segment_other?: string | null;
   is_active: boolean;
 }): Promise<Organization> {
   const token = getBankTokenFromBrowser();

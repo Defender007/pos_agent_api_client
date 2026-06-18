@@ -9,6 +9,7 @@ import SectionErrorCard, {
 import PageContainer from "@/components/layout/page-container";
 import PageTitle from "@/components/layout/page-title";
 import { getServerPageError } from "@/lib/api/server-page-error";
+import { getBusinessSegmentLabel } from "@/lib/business-segments";
 
 export default async function OrganizationsPage() {
   let organizations: Organization[] = [];
@@ -45,8 +46,16 @@ export default async function OrganizationsPage() {
         <table className="w-full">
           <thead className="bg-slate-50">
             <tr>
-              {["Name", "Code", "Email", "Phone", "Status", "Actions"].map(
-                (h) => (
+              {[
+                "Name",
+                "Code",
+                "Type",
+                "Business Segment",
+                "Email",
+                "Phone",
+                "Status",
+                "Actions",
+              ].map((h) => (
                   <th
                     key={h}
                     className="px-6 py-4 text-left text-sm font-semibold text-slate-600"
@@ -64,6 +73,28 @@ export default async function OrganizationsPage() {
                 <td className="px-6 py-4 font-semibold">{org.name}</td>
 
                 <td className="px-6 py-4">{org.code || "—"}</td>
+
+                <td className="px-6 py-4">
+                  <span
+                    className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                      org.is_system ||
+                      org.organization_type === "solopreneur_system"
+                        ? "bg-[#FFF7D6] text-[#7A5A00]"
+                        : "bg-slate-100 text-slate-700"
+                    }`}
+                  >
+                    {org.is_system ||
+                    org.organization_type === "solopreneur_system"
+                      ? "System"
+                      : "Standard"}
+                  </span>
+                </td>
+
+                <td className="px-6 py-4">
+                  {org.business_segment === "others"
+                    ? org.business_segment_other || "Others"
+                    : getBusinessSegmentLabel(org.business_segment)}
+                </td>
 
                 <td className="px-6 py-4">{org.contact_email || "—"}</td>
 
