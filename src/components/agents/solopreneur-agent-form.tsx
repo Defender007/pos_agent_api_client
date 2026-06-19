@@ -15,8 +15,9 @@ import { Toaster } from "@/components/ui/sonner";
 
 export default function SolopreneurAgentForm() {
   const router = useRouter();
-  const [businessSegment, setBusinessSegment] =
-    useState<BusinessSegment>("fast_foods");
+  const [businessSegment, setBusinessSegment] = useState<
+    BusinessSegment | ""
+  >("");
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
@@ -75,6 +76,11 @@ export default function SolopreneurAgentForm() {
       formData.get("business_segment_other") || "",
     ).trim();
 
+    if (!businessSegment) {
+      toast.error("Please select a business segment.");
+      return;
+    }
+
     if (businessSegment === "others" && !businessSegmentOther) {
       toast.error("Please specify the other business industry.");
       return;
@@ -83,12 +89,19 @@ export default function SolopreneurAgentForm() {
     setSubmitting(true);
 
     try {
+      const middleName = String(formData.get("middle_name") || "").trim();
+      const registrationNumber = String(
+        formData.get("registration_number") || "",
+      ).trim();
+
       await createSolopreneurAgent({
         first_name: String(formData.get("first_name")).trim(),
+        middle_name: middleName || null,
         last_name: String(formData.get("last_name")).trim(),
         phone: String(formData.get("phone")).trim(),
         email: String(formData.get("email")).trim(),
         business_name: String(formData.get("business_name")).trim(),
+        registration_number: registrationNumber || null,
         business_segment: businessSegment,
         business_segment_other:
           businessSegment === "others" ? businessSegmentOther : null,
@@ -132,15 +145,36 @@ export default function SolopreneurAgentForm() {
         title="Agent Information"
         description="Personal and trading details for the Solopreneur agent"
       >
-        <FormField name="first_name" label="First Name" required />
-        <FormField name="last_name" label="Last Name" required />
-        <FormField name="phone" label="Phone" type="tel" required />
-        <FormField name="email" label="Email" type="email" required />
         <FormField
-          name="business_name"
-          label="Business Name"
+          name="first_name"
+          label="First Name"
+          placeholder="e.g. Bright"
           required
-          className="md:col-span-2"
+        />
+        <FormField
+          name="middle_name"
+          label="Middle Name"
+          placeholder="e.g. Chidinma"
+        />
+        <FormField
+          name="last_name"
+          label="Last Name"
+          placeholder="e.g. Nkiruka"
+          required
+        />
+        <FormField
+          name="phone"
+          label="Phone"
+          type="tel"
+          placeholder="e.g. 2347054837911"
+          required
+        />
+        <FormField
+          name="email"
+          label="Email"
+          type="email"
+          placeholder="e.g. bright@example.com"
+          required
         />
       </FormSection>
 
@@ -148,6 +182,18 @@ export default function SolopreneurAgentForm() {
         title="Business Details"
         description="Select the industry that best describes the business"
       >
+        <FormField
+          name="business_name"
+          label="Business Name"
+          placeholder="e.g. Brinka Ventures"
+          required
+        />
+        <FormField
+          name="registration_number"
+          label="Registration Number / RC Number"
+          placeholder="e.g. RC1234567"
+        />
+
         <div className="md:col-span-2">
           <label className="mb-2 block text-sm font-semibold text-slate-700">
             Business Segment/Industry
@@ -157,10 +203,14 @@ export default function SolopreneurAgentForm() {
             name="business_segment"
             value={businessSegment}
             onChange={(event) =>
-              setBusinessSegment(event.target.value as BusinessSegment)
+              setBusinessSegment(event.target.value as BusinessSegment | "")
             }
+            required
             className="w-full rounded-xl border border-slate-300 bg-white px-4 py-3"
           >
+            <option value="" disabled>
+              Select business segment
+            </option>
             {BUSINESS_SEGMENTS.map((option) => (
               <option key={option.value} value={option.value}>
                 {option.label}
@@ -173,6 +223,7 @@ export default function SolopreneurAgentForm() {
           <FormField
             name="business_segment_other"
             label="Specify Other Industry"
+            placeholder="Specify business segment"
             required
             className="md:col-span-2"
           />
@@ -183,9 +234,24 @@ export default function SolopreneurAgentForm() {
         title="KYC Information"
         description="Identity and device verification details"
       >
-        <FormField name="bvn" label="BVN" required />
-        <FormField name="nin" label="NIN" required />
-        <FormField name="imei" label="IMEI" required />
+        <FormField
+          name="bvn"
+          label="BVN"
+          placeholder="e.g. 12345678901"
+          required
+        />
+        <FormField
+          name="nin"
+          label="NIN"
+          placeholder="e.g. 12345678901"
+          required
+        />
+        <FormField
+          name="imei"
+          label="IMEI"
+          placeholder="e.g. 356789123456789"
+          required
+        />
 
         <div className="md:col-span-2">
           <label className="mb-2 block text-sm font-semibold text-slate-700">
@@ -194,6 +260,7 @@ export default function SolopreneurAgentForm() {
           <textarea
             name="notes"
             rows={4}
+            placeholder="Additional onboarding notes"
             className="w-full rounded-xl border border-slate-300 px-4 py-3"
           />
         </div>
@@ -206,6 +273,7 @@ export default function SolopreneurAgentForm() {
         <FormField
           name="address"
           label="Address"
+          placeholder="e.g. 15 Ojuolape Street, Abuja"
           required
           className="md:col-span-2"
         />

@@ -4,10 +4,12 @@ import type { BusinessSegment } from "@/lib/business-segments";
 
 export type CreateSolopreneurAgentPayload = {
   first_name: string;
+  middle_name: string | null;
   last_name: string;
   phone: string;
   email: string;
   business_name: string;
+  registration_number: string | null;
   business_segment: BusinessSegment;
   business_segment_other: string | null;
   kyc: {
