@@ -2,9 +2,11 @@
 
 import { useRouter } from "next/navigation";
 import { useState } from "react";
+import { toast } from "sonner";
 
 import { ApiError } from "@/lib/api/api-error";
 import { bankReviewAgent } from "@/lib/api/bank-agents-client";
+import { Toaster } from "@/components/ui/sonner";
 
 type AgentApprovalActionsProps = {
   agentId: string;
@@ -14,16 +16,21 @@ export default function AgentApprovalActions({
   agentId,
 }: AgentApprovalActionsProps) {
   const router = useRouter();
+  const [rejectionNotes, setRejectionNotes] = useState("");
   const [loadingAction, setLoadingAction] = useState<
     "approved" | "rejected" | null
   >(null);
-  const [message, setMessage] = useState<string | null>(null);
-  const [error, setError] = useState<string | null>(null);
 
-  async function reviewAgent(decision: "approved" | "rejected", notes: string) {
+  async function reviewAgent(decision: "approved" | "rejected") {
+    const notes =
+      decision === "approved" ? "KYC accepted" : rejectionNotes.trim();
+
+    if (decision === "rejected" && !notes) {
+      toast.error("Rejection notes are required.");
+      return;
+    }
+
     setLoadingAction(decision);
-    setMessage(null);
-    setError(null);
 
     try {
       await bankReviewAgent(agentId, {
@@ -31,77 +38,90 @@ export default function AgentApprovalActions({
         notes,
       });
 
-      setMessage(
+      toast.success(
         decision === "approved"
           ? "Agent approved successfully."
           : "Agent rejected successfully.",
       );
-      router.refresh();
-    } catch (reviewError) {
+
+      setTimeout(() => {
+        router.push("/backoffice/agents/approvals");
+      }, 700);
+    } catch (error) {
+      if (error instanceof ApiError && error.message === "SESSION_EXPIRED") {
+        router.push("/backoffice/login?session=expired");
+        return;
+      }
+
       if (
-        reviewError instanceof ApiError &&
-        reviewError.status === 409 &&
-        reviewError.message === "No available TID for agent approval"
+        error instanceof ApiError &&
+        error.status === 409 &&
+        error.message === "No available TID for agent approval"
       ) {
-        setError(
+        toast.error(
           "No available TID. Please preload TIDs before approving this agent.",
         );
         return;
       }
 
-      const fallback =
-        decision === "approved"
-          ? "Unable to approve agent."
-          : "Unable to reject agent.";
-
-      setError(reviewError instanceof Error ? reviewError.message : fallback);
+      toast.error(
+        error instanceof Error
+          ? error.message
+          : decision === "approved"
+            ? "Unable to approve agent."
+            : "Unable to reject agent.",
+      );
     } finally {
       setLoadingAction(null);
     }
   }
 
-  function handleReject() {
-    const notes = window.prompt("Enter rejection notes");
-
-    if (notes === null) {
-      return;
-    }
-
-    const trimmedNotes = notes.trim();
-
-    if (!trimmedNotes) {
-      setMessage(null);
-      setError("Rejection notes are required.");
-      return;
-    }
-
-    void reviewAgent("rejected", trimmedNotes);
-  }
-
   return (
-    <div className="space-y-2">
-      <div className="flex gap-2">
+    <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
+      <h2 className="text-lg font-bold text-slate-900">Bank Review</h2>
+      <p className="mt-1 text-sm text-slate-500">
+        Approve the agent after reviewing the profile, or provide a reason for
+        rejection.
+      </p>
+
+      <div className="mt-5">
+        <label
+          htmlFor="rejection-notes"
+          className="mb-2 block text-sm font-semibold text-slate-700"
+        >
+          Rejection Notes
+        </label>
+        <textarea
+          id="rejection-notes"
+          value={rejectionNotes}
+          onChange={(event) => setRejectionNotes(event.target.value)}
+          rows={4}
+          placeholder="Enter the reason if rejecting this agent"
+          className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-[#007A3D] focus:ring-2 focus:ring-[#007A3D]/20"
+        />
+      </div>
+
+      <div className="mt-5 flex flex-col gap-3 sm:flex-row">
         <button
           type="button"
           disabled={loadingAction !== null}
-          onClick={() => void reviewAgent("approved", "KYC accepted")}
-          className="rounded-lg bg-[#007A3D] px-3 py-2 text-xs font-semibold text-white transition hover:bg-[#005C2E] disabled:cursor-not-allowed disabled:opacity-50"
+          onClick={() => void reviewAgent("approved")}
+          className="rounded-xl bg-[#007A3D] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#005C2E] disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loadingAction === "approved" ? "Approving..." : "Approve"}
+          {loadingAction === "approved" ? "Approving..." : "Approve Agent"}
         </button>
 
         <button
           type="button"
           disabled={loadingAction !== null}
-          onClick={handleReject}
-          className="rounded-lg border border-red-200 px-3 py-2 text-xs font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
+          onClick={() => void reviewAgent("rejected")}
+          className="rounded-xl border border-red-200 px-5 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
         >
-          {loadingAction === "rejected" ? "Rejecting..." : "Reject"}
+          {loadingAction === "rejected" ? "Rejecting..." : "Reject Agent"}
         </button>
       </div>
 
-      {message && <p className="text-xs font-medium text-[#005C2E]">{message}</p>}
-      {error && <p className="text-xs font-medium text-red-600">{error}</p>}
+      <Toaster richColors />
     </div>
   );
 }

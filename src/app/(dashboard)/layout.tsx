@@ -30,7 +30,7 @@ export default async function DashboardLayout({
     <div className="flex min-h-screen bg-slate-50">
       <Sidebar />
 
-      <main className="flex-1">
+      <main className="min-w-0 flex-1">
         <TopHeader />
 
         <div className="p-8">{children}</div>

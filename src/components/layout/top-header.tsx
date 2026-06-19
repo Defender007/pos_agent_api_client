@@ -3,6 +3,7 @@
 import { usePathname } from "next/navigation";
 
 function getTitle(pathname: string) {
+  if (pathname.startsWith("/backoffice/agents")) return "Agent Management";
   if (pathname.startsWith("/backoffice/change-password")) {
     return "Change Password";
   }

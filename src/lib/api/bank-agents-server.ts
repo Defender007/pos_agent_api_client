@@ -43,6 +43,21 @@ export function getRejectedAgents(): Promise<BankAgent[]> {
   return getBankAgents("/agents/rejected");
 }
 
+export async function getBankAgentById(agentId: string): Promise<BankAgent> {
+  const response = await fetch(`${API_BASE_URL}/bankadmin/agents/${agentId}`, {
+    cache: "no-store",
+    headers: await getBankAuthHeaders(),
+  });
+
+  if (!response.ok) {
+    throw await parseApiError(response);
+  }
+
+  const result = await response.json();
+
+  return result.data;
+}
+
 export async function bankReviewAgent(
   agentId: string,
   payload: BankAgentReviewPayload,

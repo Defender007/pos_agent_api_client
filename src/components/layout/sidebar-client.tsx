@@ -46,8 +46,10 @@ export default function SidebarClient({ hasBankToken }: SidebarClientProps) {
       )}
 
       <Link
-        href={hasBankToken ? "/agents/approvals" : "/agents"}
-        className={itemClass("/agents")}
+        href={hasBankToken ? "/backoffice/agents/approvals" : "/agents"}
+        className={itemClass(
+          hasBankToken ? "/backoffice/agents/approvals" : "/agents",
+        )}
       >
         <Users size={18} />
         Agents

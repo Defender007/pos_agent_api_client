@@ -14,6 +14,7 @@ export type OrganizationAgent = {
   phone: string;
   email: string;
   business_name: string;
+  agent_type?: "standard" | "solopreneur" | null;
   tid?: string | null;
   organization_id: string;
   created_by_staff_id: string;

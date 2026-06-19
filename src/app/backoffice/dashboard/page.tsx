@@ -115,21 +115,21 @@ export default async function BackofficeDashboardPage() {
             <SummaryCard
               title="Pending Approval Agents"
               value={pendingAgentsCount}
-              href="/agents/approvals"
+              href="/backoffice/agents/approvals"
               tone="bg-[#F9C80E] text-[#0F172A]"
             />
 
             <SummaryCard
               title="Approved Agents"
               value={approvedAgentsCount}
-              href="/agents/approvals"
+              href="/backoffice/agents/approvals"
               tone="bg-[#007A3D] text-white"
             />
 
             <SummaryCard
               title="Rejected Agents"
               value={rejectedAgentsCount}
-              href="/agents/approvals"
+              href="/backoffice/agents/approvals"
               tone="bg-rose-600 text-white"
             />
 

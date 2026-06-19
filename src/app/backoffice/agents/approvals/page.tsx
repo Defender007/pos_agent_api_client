@@ -1,11 +1,13 @@
 import { redirect } from "next/navigation";
+import Link from "next/link";
 
-import AgentApprovalActions from "@/components/agents/agent-approval-actions";
 import SectionErrorCard, {
   type SectionErrorCardProps,
 } from "@/components/common/section-error-card";
 import PageContainer from "@/components/layout/page-container";
 import PageTitle from "@/components/layout/page-title";
+import Sidebar from "@/components/layout/sidebar";
+import TopHeader from "@/components/layout/top-header";
 import {
   getApprovedAgents,
   getPendingApprovalAgents,
@@ -18,27 +20,6 @@ function getAgentName(agent: BankAgent) {
   return `${agent.first_name || ""} ${agent.last_name || ""}`.trim() || "—";
 }
 
-function getOrganizationName(agent: BankAgent) {
-  if (agent.organization_name) {
-    return agent.organization_name;
-  }
-
-  if (typeof agent.organization === "string") {
-    return agent.organization;
-  }
-
-  if (agent.organization) {
-    return (
-      agent.organization.name ||
-      agent.organization.code ||
-      agent.organization_id ||
-      "—"
-    );
-  }
-
-  return agent.organization_id || "—";
-}
-
 function statusPillClass(statusTone: "pending" | "approved" | "rejected") {
   const styles = {
     pending: "bg-[#FFF7D6] text-[#7A5A00]",
@@ -49,35 +30,47 @@ function statusPillClass(statusTone: "pending" | "approved" | "rejected") {
   return `rounded-full px-3 py-1 text-xs font-semibold ${styles[statusTone]}`;
 }
 
+function AgentTypeBadge({ agentType }: { agentType?: string | null }) {
+  const isSolopreneur = agentType === "solopreneur";
+
+  return (
+    <span
+      className={`rounded-full px-3 py-1 text-xs font-semibold ${
+        isSolopreneur
+          ? "bg-[#FFF7D6] text-[#005C2E]"
+          : "bg-slate-100 text-slate-700"
+      }`}
+    >
+      {isSolopreneur ? "Solopreneur Agent" : "Standard Agent"}
+    </span>
+  );
+}
+
 function AgentsTableSection({
   title,
   description,
   agents,
   emptyMessage,
-  showActions = false,
   statusTone,
 }: {
   title: string;
   description: string;
   agents: BankAgent[];
   emptyMessage: string;
-  showActions?: boolean;
   statusTone: "pending" | "approved" | "rejected";
 }) {
   const headers = [
     "Agent Code",
     "Name",
     "Business Name",
-    "Phone",
-    "Email",
-    "Organization",
-    "TID",
+    "Agent Type",
     "Status",
-    ...(showActions ? ["Actions"] : []),
+    "TID",
+    "Actions",
   ];
 
   return (
-    <div className="mt-8 rounded-2xl border bg-white p-6 shadow-sm">
+    <div className="mt-8 min-w-0 rounded-2xl border bg-white p-4 shadow-sm sm:p-6">
       <div className="mb-5">
         <h2 className="text-xl font-bold text-slate-900">{title}</h2>
 
@@ -89,8 +82,8 @@ function AgentsTableSection({
           <p className="text-sm text-slate-500">{emptyMessage}</p>
         </div>
       ) : (
-        <div className="overflow-hidden rounded-xl border">
-          <table className="w-full">
+        <div className="max-w-full overflow-x-auto rounded-xl border">
+          <table className="w-full min-w-[900px]">
             <thead className="bg-slate-50">
               <tr>
                 {headers.map((header) => (
@@ -119,20 +112,8 @@ function AgentsTableSection({
                     {agent.business_name || "—"}
                   </td>
 
-                  <td className="px-6 py-4 text-sm text-slate-700">
-                    {agent.phone || "—"}
-                  </td>
-
-                  <td className="px-6 py-4 text-sm text-slate-700">
-                    {agent.email || "—"}
-                  </td>
-
-                  <td className="px-6 py-4 text-sm text-slate-700">
-                    {getOrganizationName(agent)}
-                  </td>
-
-                  <td className="px-6 py-4 text-sm text-slate-700">
-                    {agent.tid || "—"}
+                  <td className="px-6 py-4 text-sm">
+                    <AgentTypeBadge agentType={agent.agent_type} />
                   </td>
 
                   <td className="px-6 py-4 text-sm">
@@ -141,11 +122,18 @@ function AgentsTableSection({
                     </span>
                   </td>
 
-                  {showActions && (
-                    <td className="px-6 py-4 text-sm">
-                      <AgentApprovalActions agentId={agent.id} />
-                    </td>
-                  )}
+                  <td className="px-6 py-4 text-sm text-slate-700">
+                    {agent.tid || "—"}
+                  </td>
+
+                  <td className="px-6 py-4 text-sm">
+                    <Link
+                      href={`/backoffice/agents/approvals/${agent.id}`}
+                      className="inline-flex rounded-lg border border-[#BFDCCB] px-3 py-2 font-semibold text-[#005C2E] transition hover:bg-[#E6F4EC]"
+                    >
+                      {statusTone === "pending" ? "Review" : "View Details"}
+                    </Link>
+                  </td>
                 </tr>
               ))}
             </tbody>
@@ -179,42 +167,60 @@ export default async function AgentApprovalsPage() {
   }
 
   return (
-    <PageContainer>
-      <PageTitle
-        title="Agent Approvals"
-        description="Review agents pending bank approval"
-      />
+    <div className="flex min-h-screen bg-slate-50">
+      <Sidebar />
 
-      {loadError ? (
-        <SectionErrorCard {...loadError} />
-      ) : (
-        <>
-      <AgentsTableSection
-        title="Pending Approval Agents"
-        description="Agents awaiting backoffice review"
-        agents={pendingAgents}
-        emptyMessage="No agents are currently pending approval."
-        showActions
-        statusTone="pending"
-      />
+      <main className="min-w-0 flex-1">
+        <TopHeader />
 
-      <AgentsTableSection
-        title="Approved Agents"
-        description="Agents approved by backoffice"
-        agents={approvedAgents}
-        emptyMessage="No approved agents found."
-        statusTone="approved"
-      />
+        <div className="p-8">
+          <PageContainer>
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
+              <PageTitle
+                title="Agent Approvals"
+                description="Review agents pending bank approval"
+              />
 
-      <AgentsTableSection
-        title="Rejected Agents"
-        description="Agents rejected by backoffice"
-        agents={rejectedAgents}
-        emptyMessage="No rejected agents found."
-        statusTone="rejected"
-      />
-        </>
-      )}
-    </PageContainer>
+              <Link
+                href="/backoffice/agents/solopreneur/new"
+                className="rounded-xl bg-[#007A3D] px-5 py-3 text-center text-sm font-semibold text-white transition hover:bg-[#005C2E]"
+              >
+                Create Solopreneur Agent
+              </Link>
+            </div>
+
+            {loadError ? (
+              <SectionErrorCard {...loadError} />
+            ) : (
+              <>
+                <AgentsTableSection
+                  title="Pending Approval Agents"
+                  description="Agents awaiting backoffice review"
+                  agents={pendingAgents}
+                  emptyMessage="No agents are currently pending approval."
+                  statusTone="pending"
+                />
+
+                <AgentsTableSection
+                  title="Approved Agents"
+                  description="Agents approved by backoffice"
+                  agents={approvedAgents}
+                  emptyMessage="No approved agents found."
+                  statusTone="approved"
+                />
+
+                <AgentsTableSection
+                  title="Rejected Agents"
+                  description="Agents rejected by backoffice"
+                  agents={rejectedAgents}
+                  emptyMessage="No rejected agents found."
+                  statusTone="rejected"
+                />
+              </>
+            )}
+          </PageContainer>
+        </div>
+      </main>
+    </div>
   );
 }
