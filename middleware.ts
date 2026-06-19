@@ -1,13 +1,7 @@
 import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
-const merchantProtectedRoutes = ["/dashboard", "/agents", "/change-password"];
-
 const bankProtectedRoutes = [
-  "/backoffice/dashboard",
-  "/backoffice/change-password",
-  "/backoffice/agents",
-  "/agents/approvals",
   "/organizations",
   "/staff",
   "/roles",
@@ -16,19 +10,65 @@ const bankProtectedRoutes = [
   "/settings",
 ];
 
+const merchantProtectedRoutes = ["/dashboard", "/agents", "/change-password"];
+
+function matchesRoute(pathname: string, route: string) {
+  return pathname === route || pathname.startsWith(`${route}/`);
+}
+
+function clearAuthCookies(response: NextResponse) {
+  response.cookies.set("access_token", "", {
+    expires: new Date(0),
+    path: "/",
+  });
+  response.cookies.set("bank_access_token", "", {
+    expires: new Date(0),
+    path: "/",
+  });
+
+  return response;
+}
+
 export function middleware(request: NextRequest) {
   const { pathname } = request.nextUrl;
-
   const merchantToken = request.cookies.get("access_token")?.value;
   const bankToken = request.cookies.get("bank_access_token")?.value;
 
-  const isBankProtectedRoute = bankProtectedRoutes.some((route) =>
-    pathname.startsWith(route),
-  );
+  const isLegacyApprovalRoute = matchesRoute(pathname, "/agents/approvals");
 
-  const isMerchantProtectedRoute =
-    !isBankProtectedRoute &&
-    merchantProtectedRoutes.some((route) => pathname.startsWith(route));
+  if (isLegacyApprovalRoute) {
+    if (merchantToken && bankToken) {
+      return clearAuthCookies(
+        NextResponse.redirect(
+          new URL("/backoffice/login?session=conflict", request.url),
+        ),
+      );
+    }
+
+    if (!bankToken) {
+      return NextResponse.redirect(
+        new URL("/backoffice/login?session=expired", request.url),
+      );
+    }
+
+    const approvalSuffix = pathname.slice("/agents/approvals".length);
+
+    return NextResponse.redirect(
+      new URL(
+        `/backoffice/agents/approvals${approvalSuffix}`,
+        request.url,
+      ),
+    );
+  }
+
+  const isBackofficeLogin = pathname === "/backoffice/login";
+  const isBankProtectedRoute =
+    !isBackofficeLogin &&
+    (matchesRoute(pathname, "/backoffice") ||
+      bankProtectedRoutes.some((route) => matchesRoute(pathname, route)));
+  const isMerchantProtectedRoute = merchantProtectedRoutes.some((route) =>
+    matchesRoute(pathname, route),
+  );
 
   if (
     (isBankProtectedRoute || isMerchantProtectedRoute) &&
@@ -36,20 +76,12 @@ export function middleware(request: NextRequest) {
     bankToken
   ) {
     const loginPath = isBankProtectedRoute ? "/backoffice/login" : "/login";
-    const response = NextResponse.redirect(
-      new URL(`${loginPath}?session=conflict`, request.url),
+
+    return clearAuthCookies(
+      NextResponse.redirect(
+        new URL(`${loginPath}?session=conflict`, request.url),
+      ),
     );
-
-    response.cookies.set("access_token", "", {
-      expires: new Date(0),
-      path: "/",
-    });
-    response.cookies.set("bank_access_token", "", {
-      expires: new Date(0),
-      path: "/",
-    });
-
-    return response;
   }
 
   if (isBankProtectedRoute && bankToken) {
@@ -62,10 +94,10 @@ export function middleware(request: NextRequest) {
 
   if (isBankProtectedRoute) {
     const loginPath =
-      pathname.startsWith("/backoffice/change-password") ||
-      pathname.startsWith("/backoffice/agents")
-      ? "/backoffice/login?session=expired"
-      : "/backoffice/login";
+      pathname.startsWith("/backoffice/agents") ||
+      pathname.startsWith("/backoffice/change-password")
+        ? "/backoffice/login?session=expired"
+        : "/backoffice/login";
 
     return NextResponse.redirect(new URL(loginPath, request.url));
   }
@@ -83,10 +115,8 @@ export function middleware(request: NextRequest) {
 
 export const config = {
   matcher: [
+    "/backoffice/:path*",
     "/dashboard/:path*",
-    "/backoffice/dashboard/:path*",
-    "/backoffice/change-password/:path*",
-    "/backoffice/agents/:path*",
     "/change-password/:path*",
     "/agents/:path*",
     "/organizations/:path*",

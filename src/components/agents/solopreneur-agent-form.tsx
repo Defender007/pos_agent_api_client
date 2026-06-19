@@ -121,7 +121,7 @@ export default function SolopreneurAgentForm() {
 
       toast.success("Solopreneur agent created successfully");
       setTimeout(() => {
-        router.push("/agents/approvals");
+        router.push("/backoffice/agents/approvals");
       }, 700);
     } catch (error) {
       if (error instanceof ApiError && error.message === "SESSION_EXPIRED") {
