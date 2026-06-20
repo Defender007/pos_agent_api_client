@@ -66,7 +66,6 @@ export default function EditOrganizationStaffForm({
             await updateOrganizationStaff(organizationId, staff.id, {
               email: String(formData.get("email") || ""),
               status: String(formData.get("status") || ""),
-              password: String(formData.get("password") || "") || undefined,
               profile: {
                 first_name: String(formData.get("first_name") || ""),
                 last_name: String(formData.get("last_name") || ""),
@@ -110,18 +109,6 @@ export default function EditOrganizationStaffForm({
             <option value="suspended">suspended</option>
             <option value="deactivated">deactivated</option>
           </select>
-        </div>
-
-        <div>
-          <label className="mb-2 block text-sm font-semibold text-slate-700">
-            Password
-          </label>
-          <input
-            name="password"
-            type="password"
-            placeholder="Leave blank to keep current password"
-            className="w-full rounded-xl border border-slate-300 px-4 py-3"
-          />
         </div>
 
         {profileFields.map(({ name, label, value }) => (

@@ -1,4 +1,10 @@
-export type AgentStatus = "active" | "suspended" | "pending";
+export type AgentStatus =
+  | "active"
+  | "suspended"
+  | "pending"
+  | "pending_approval"
+  | "rejected"
+  | "deactivated";
 
 export type AgentKyc = {
   id?: string;
