@@ -15,6 +15,7 @@ import type { BankAgentStatusValue } from "@/types/bank-agent";
 type AgentApprovalActionsProps = {
   agentId: string;
   status: string;
+  tid?: string | null;
 };
 
 type AgentAction =
@@ -40,18 +41,20 @@ type AgentAction =
 const actionStyles = {
   approve:
     "rounded-xl bg-[#007A3D] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#005C2E]",
+  reactivate:
+    "rounded-xl bg-[#007A3D] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#005C2E]",
   suspend:
     "rounded-xl border border-[#F9C80E] px-5 py-3 text-sm font-semibold text-[#7A5A00] transition hover:bg-[#FFF7D6]",
   reject:
     "rounded-xl border border-red-200 px-5 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50",
   deactivate:
     "rounded-xl bg-red-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-800",
+  restore:
+    "rounded-xl border border-[#F9C80E] px-5 py-3 text-sm font-semibold text-[#7A5A00] transition hover:bg-[#FFF7D6]",
 };
 
-function getAvailableActions(status: string): AgentAction[] {
-  const normalizedStatus = status.toLowerCase();
-
-  if (normalizedStatus === "pending" || normalizedStatus === "pending_approval") {
+function getAvailableActions(status: string, tid?: string | null): AgentAction[] {
+  if (status === "pending" || status === "pending_approval") {
     return [
       {
         kind: "approval",
@@ -74,7 +77,7 @@ function getAvailableActions(status: string): AgentAction[] {
     ];
   }
 
-  if (normalizedStatus === "active") {
+  if (status === "active") {
     return [
       {
         kind: "status",
@@ -106,8 +109,17 @@ function getAvailableActions(status: string): AgentAction[] {
     ];
   }
 
-  if (normalizedStatus === "suspended") {
+  if (status === "suspended_by_bank") {
     return [
+      {
+        kind: "status",
+        status: "active",
+        label: "Reactivate",
+        confirmLabel: "Confirm Reactivation",
+        successMessage: "Agent reactivated successfully",
+        requiresNotes: true,
+        className: actionStyles.reactivate,
+      },
       {
         kind: "status",
         status: "deactivated",
@@ -120,7 +132,70 @@ function getAvailableActions(status: string): AgentAction[] {
     ];
   }
 
+  if (status === "deactivated_by_bank") {
+    return [
+      {
+        kind: "status",
+        status: "active",
+        label: "Reactivate",
+        confirmLabel: "Confirm Reactivation",
+        successMessage: "Agent reactivated successfully",
+        requiresNotes: true,
+        className: actionStyles.reactivate,
+      },
+      {
+        kind: "status",
+        status: "suspended",
+        label: "Suspend",
+        confirmLabel: "Confirm Suspension",
+        successMessage: "Agent suspended successfully",
+        requiresNotes: true,
+        className: actionStyles.suspend,
+      },
+    ];
+  }
+
+  if (status === "rejected") {
+    if (tid) {
+      return [
+        {
+          kind: "status",
+          status: "active",
+          label: "Reactivate",
+          confirmLabel: "Confirm Reactivation",
+          successMessage: "Agent reactivated successfully",
+          requiresNotes: true,
+          className: actionStyles.reactivate,
+        },
+      ];
+    }
+
+    return [
+      {
+        kind: "status",
+        status: "pending_approval",
+        label: "Restore for Approval",
+        confirmLabel: "Confirm Restore for Approval",
+        successMessage: "Agent restored to pending approval successfully",
+        requiresNotes: true,
+        className: actionStyles.restore,
+      },
+    ];
+  }
+
   return [];
+}
+
+function getInformationalMessage(status: string) {
+  if (status === "suspended") {
+    return "This agent was suspended by Merchant Staff and cannot be reactivated or overridden by Bank Staff.";
+  }
+
+  if (status === "deactivated") {
+    return "This agent was deactivated by Merchant Staff and cannot be reactivated or overridden by Bank Staff.";
+  }
+
+  return null;
 }
 
 function getActionKey(action: AgentAction) {
@@ -130,16 +205,18 @@ function getActionKey(action: AgentAction) {
 export default function AgentApprovalActions({
   agentId,
   status,
+  tid,
 }: AgentApprovalActionsProps) {
   const router = useRouter();
-  const actions = useMemo(() => getAvailableActions(status), [status]);
+  const actions = useMemo(() => getAvailableActions(status, tid), [status, tid]);
+  const informationalMessage = getInformationalMessage(status);
   const [selectedAction, setSelectedAction] = useState<AgentAction | null>(
     null,
   );
   const [notes, setNotes] = useState("");
   const [loadingAction, setLoadingAction] = useState<string | null>(null);
 
-  if (actions.length === 0) {
+  if (actions.length === 0 && !informationalMessage) {
     return null;
   }
 
@@ -213,26 +290,34 @@ export default function AgentApprovalActions({
         Review available actions for this agent status before confirming.
       </p>
 
-      <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
-        {actions.map((action) => {
-          const actionKey = getActionKey(action);
+      {informationalMessage && (
+        <div className="mt-5 rounded-xl border border-[#F9C80E]/40 bg-[#FFF7D6] p-4 text-sm font-semibold text-[#7A5A00]">
+          {informationalMessage}
+        </div>
+      )}
 
-          return (
-            <button
-              key={actionKey}
-              type="button"
-              disabled={loadingAction !== null}
-              onClick={() => {
-                setSelectedAction(action);
-                setNotes("");
-              }}
-              className={`${action.className} disabled:cursor-not-allowed disabled:opacity-50`}
-            >
-              {action.label}
-            </button>
-          );
-        })}
-      </div>
+      {actions.length > 0 && (
+        <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+          {actions.map((action) => {
+            const actionKey = getActionKey(action);
+
+            return (
+              <button
+                key={actionKey}
+                type="button"
+                disabled={loadingAction !== null}
+                onClick={() => {
+                  setSelectedAction(action);
+                  setNotes("");
+                }}
+                className={`${action.className} disabled:cursor-not-allowed disabled:opacity-50`}
+              >
+                {action.label}
+              </button>
+            );
+          })}
+        </div>
+      )}
 
       {selectedAction && (
         <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4">

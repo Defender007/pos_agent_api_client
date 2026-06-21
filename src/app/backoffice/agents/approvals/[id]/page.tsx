@@ -253,7 +253,11 @@ export default async function BankAgentReviewPage({
           </SectionCard>
         </div>
 
-        <AgentApprovalActions agentId={agent.id} status={agent.status} />
+        <AgentApprovalActions
+          agentId={agent.id}
+          status={agent.status}
+          tid={agent.tid}
+        />
       </PageContainer>
     </BackofficeShell>
   );

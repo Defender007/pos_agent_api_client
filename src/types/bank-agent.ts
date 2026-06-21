@@ -5,7 +5,12 @@ export type BankAgentReviewPayload = {
   notes?: string | null;
 };
 
-export type BankAgentStatusValue = "suspended" | "rejected" | "deactivated";
+export type BankAgentStatusValue =
+  | "active"
+  | "pending_approval"
+  | "suspended"
+  | "rejected"
+  | "deactivated";
 
 export type BankAgentStatusPayload = {
   status: BankAgentStatusValue;
