@@ -137,8 +137,6 @@ export default async function BankAgentReviewPage({
   const address = agent.address ?? agent.location?.address;
   const latitude = agent.latitude ?? agent.location?.latitude;
   const longitude = agent.longitude ?? agent.location?.longitude;
-  const isPending =
-    agent.status === "pending" || agent.status === "pending_approval";
   const businessSegment =
     agent.business_segment === "others"
       ? "Others"
@@ -255,7 +253,7 @@ export default async function BankAgentReviewPage({
           </SectionCard>
         </div>
 
-        {isPending && <AgentApprovalActions agentId={agent.id} />}
+        <AgentApprovalActions agentId={agent.id} status={agent.status} />
       </PageContainer>
     </BackofficeShell>
   );

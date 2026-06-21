@@ -1,48 +1,180 @@
 "use client";
 
 import { useRouter } from "next/navigation";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { toast } from "sonner";
 
 import { ApiError } from "@/lib/api/api-error";
-import { bankReviewAgent } from "@/lib/api/bank-agents-client";
+import {
+  bankReviewAgent,
+  bankUpdateAgentStatus,
+} from "@/lib/api/bank-agents-client";
 import { Toaster } from "@/components/ui/sonner";
+import type { BankAgentStatusValue } from "@/types/bank-agent";
 
 type AgentApprovalActionsProps = {
   agentId: string;
+  status: string;
 };
+
+type AgentAction =
+  | {
+      kind: "approval";
+      decision: "approved" | "rejected";
+      label: string;
+      confirmLabel: string;
+      successMessage: string;
+      requiresNotes: boolean;
+      className: string;
+    }
+  | {
+      kind: "status";
+      status: BankAgentStatusValue;
+      label: string;
+      confirmLabel: string;
+      successMessage: string;
+      requiresNotes: true;
+      className: string;
+    };
+
+const actionStyles = {
+  approve:
+    "rounded-xl bg-[#007A3D] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#005C2E]",
+  suspend:
+    "rounded-xl border border-[#F9C80E] px-5 py-3 text-sm font-semibold text-[#7A5A00] transition hover:bg-[#FFF7D6]",
+  reject:
+    "rounded-xl border border-red-200 px-5 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50",
+  deactivate:
+    "rounded-xl bg-red-700 px-5 py-3 text-sm font-semibold text-white transition hover:bg-red-800",
+};
+
+function getAvailableActions(status: string): AgentAction[] {
+  const normalizedStatus = status.toLowerCase();
+
+  if (normalizedStatus === "pending" || normalizedStatus === "pending_approval") {
+    return [
+      {
+        kind: "approval",
+        decision: "approved",
+        label: "Approve",
+        confirmLabel: "Confirm Approval",
+        successMessage: "Agent approved successfully.",
+        requiresNotes: false,
+        className: actionStyles.approve,
+      },
+      {
+        kind: "approval",
+        decision: "rejected",
+        label: "Reject",
+        confirmLabel: "Confirm Rejection",
+        successMessage: "Agent rejected successfully.",
+        requiresNotes: true,
+        className: actionStyles.reject,
+      },
+    ];
+  }
+
+  if (normalizedStatus === "active") {
+    return [
+      {
+        kind: "status",
+        status: "suspended",
+        label: "Suspend",
+        confirmLabel: "Confirm Suspension",
+        successMessage: "Agent suspended successfully.",
+        requiresNotes: true,
+        className: actionStyles.suspend,
+      },
+      {
+        kind: "status",
+        status: "rejected",
+        label: "Reject",
+        confirmLabel: "Confirm Rejection",
+        successMessage: "Agent rejected successfully.",
+        requiresNotes: true,
+        className: actionStyles.reject,
+      },
+      {
+        kind: "status",
+        status: "deactivated",
+        label: "Deactivate",
+        confirmLabel: "Confirm Deactivation",
+        successMessage: "Agent deactivated successfully.",
+        requiresNotes: true,
+        className: actionStyles.deactivate,
+      },
+    ];
+  }
+
+  if (normalizedStatus === "suspended") {
+    return [
+      {
+        kind: "status",
+        status: "deactivated",
+        label: "Deactivate",
+        confirmLabel: "Confirm Deactivation",
+        successMessage: "Agent deactivated successfully.",
+        requiresNotes: true,
+        className: actionStyles.deactivate,
+      },
+    ];
+  }
+
+  return [];
+}
+
+function getActionKey(action: AgentAction) {
+  return action.kind === "approval" ? action.decision : action.status;
+}
 
 export default function AgentApprovalActions({
   agentId,
+  status,
 }: AgentApprovalActionsProps) {
   const router = useRouter();
-  const [rejectionNotes, setRejectionNotes] = useState("");
-  const [loadingAction, setLoadingAction] = useState<
-    "approved" | "rejected" | null
-  >(null);
+  const actions = useMemo(() => getAvailableActions(status), [status]);
+  const [selectedAction, setSelectedAction] = useState<AgentAction | null>(
+    null,
+  );
+  const [notes, setNotes] = useState("");
+  const [loadingAction, setLoadingAction] = useState<string | null>(null);
 
-  async function reviewAgent(decision: "approved" | "rejected") {
-    const notes =
-      decision === "approved" ? "KYC accepted" : rejectionNotes.trim();
+  if (actions.length === 0) {
+    return null;
+  }
 
-    if (decision === "rejected" && !notes) {
-      toast.error("Rejection notes are required.");
+  async function submitAction() {
+    if (!selectedAction) {
       return;
     }
 
-    setLoadingAction(decision);
+    const trimmedNotes = notes.trim();
+
+    if (selectedAction.requiresNotes && !trimmedNotes) {
+      toast.error("Notes are required for this action.");
+      return;
+    }
+
+    const actionKey = getActionKey(selectedAction);
+    setLoadingAction(actionKey);
 
     try {
-      await bankReviewAgent(agentId, {
-        decision,
-        notes,
-      });
+      if (selectedAction.kind === "approval") {
+        await bankReviewAgent(agentId, {
+          decision: selectedAction.decision,
+          notes:
+            selectedAction.decision === "approved"
+              ? "KYC accepted"
+              : trimmedNotes,
+        });
+      } else {
+        await bankUpdateAgentStatus(agentId, {
+          status: selectedAction.status,
+          notes: trimmedNotes,
+        });
+      }
 
-      toast.success(
-        decision === "approved"
-          ? "Agent approved successfully."
-          : "Agent rejected successfully.",
-      );
+      toast.success(selectedAction.successMessage);
 
       setTimeout(() => {
         router.push("/backoffice/agents/approvals");
@@ -67,9 +199,7 @@ export default function AgentApprovalActions({
       toast.error(
         error instanceof Error
           ? error.message
-          : decision === "approved"
-            ? "Unable to approve agent."
-            : "Unable to reject agent.",
+          : "Unable to update agent status.",
       );
     } finally {
       setLoadingAction(null);
@@ -78,48 +208,89 @@ export default function AgentApprovalActions({
 
   return (
     <div className="rounded-2xl border border-slate-200 bg-white p-6 shadow-sm">
-      <h2 className="text-lg font-bold text-slate-900">Bank Review</h2>
+      <h2 className="text-lg font-bold text-slate-900">Agent Actions</h2>
       <p className="mt-1 text-sm text-slate-500">
-        Approve the agent after reviewing the profile, or provide a reason for
-        rejection.
+        Review available actions for this agent status before confirming.
       </p>
 
-      <div className="mt-5">
-        <label
-          htmlFor="rejection-notes"
-          className="mb-2 block text-sm font-semibold text-slate-700"
-        >
-          Rejection Notes
-        </label>
-        <textarea
-          id="rejection-notes"
-          value={rejectionNotes}
-          onChange={(event) => setRejectionNotes(event.target.value)}
-          rows={4}
-          placeholder="Enter the reason if rejecting this agent"
-          className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-[#007A3D] focus:ring-2 focus:ring-[#007A3D]/20"
-        />
+      <div className="mt-5 flex flex-col gap-3 sm:flex-row sm:flex-wrap">
+        {actions.map((action) => {
+          const actionKey = getActionKey(action);
+
+          return (
+            <button
+              key={actionKey}
+              type="button"
+              disabled={loadingAction !== null}
+              onClick={() => {
+                setSelectedAction(action);
+                setNotes("");
+              }}
+              className={`${action.className} disabled:cursor-not-allowed disabled:opacity-50`}
+            >
+              {action.label}
+            </button>
+          );
+        })}
       </div>
 
-      <div className="mt-5 flex flex-col gap-3 sm:flex-row">
-        <button
-          type="button"
-          disabled={loadingAction !== null}
-          onClick={() => void reviewAgent("approved")}
-          className="rounded-xl bg-[#007A3D] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#005C2E] disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {loadingAction === "approved" ? "Approving..." : "Approve Agent"}
-        </button>
+      {selectedAction && (
+        <div className="mt-6 rounded-xl border border-slate-200 bg-slate-50 p-4">
+          <h3 className="text-sm font-bold text-slate-900">
+            {selectedAction.confirmLabel}
+          </h3>
+          <p className="mt-1 text-sm text-slate-500">
+            {selectedAction.kind === "approval" &&
+            selectedAction.decision === "approved"
+              ? "This will approve the agent with the existing bank-review payload."
+              : "Enter notes and confirm this status change."}
+          </p>
 
-        <button
-          type="button"
-          disabled={loadingAction !== null}
-          onClick={() => void reviewAgent("rejected")}
-          className="rounded-xl border border-red-200 px-5 py-3 text-sm font-semibold text-red-600 transition hover:bg-red-50 disabled:cursor-not-allowed disabled:opacity-50"
-        >
-          {loadingAction === "rejected" ? "Rejecting..." : "Reject Agent"}
-        </button>
-      </div>
+          {selectedAction.requiresNotes && (
+            <div className="mt-4">
+              <label
+                htmlFor="agent-action-notes"
+                className="mb-2 block text-sm font-semibold text-slate-700"
+              >
+                Notes
+              </label>
+              <textarea
+                id="agent-action-notes"
+                value={notes}
+                onChange={(event) => setNotes(event.target.value)}
+                rows={4}
+                placeholder="Enter action notes"
+                className="w-full rounded-xl border border-slate-300 px-4 py-3 outline-none transition focus:border-[#007A3D] focus:ring-2 focus:ring-[#007A3D]/20"
+              />
+            </div>
+          )}
+
+          <div className="mt-4 flex flex-col gap-3 sm:flex-row">
+            <button
+              type="button"
+              disabled={loadingAction !== null}
+              onClick={() => void submitAction()}
+              className="rounded-xl bg-[#007A3D] px-5 py-3 text-sm font-semibold text-white transition hover:bg-[#005C2E] disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              {loadingAction === getActionKey(selectedAction)
+                ? "Submitting..."
+                : selectedAction.confirmLabel}
+            </button>
+
+            <button
+              type="button"
+              disabled={loadingAction !== null}
+              onClick={() => {
+                setSelectedAction(null);
+                setNotes("");
+              }}
+              className="rounded-xl border border-slate-300 px-5 py-3 text-sm font-semibold text-slate-700 transition hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+            >
+              Cancel
+            </button>
+          </div>
+        </div>
+      )}
 
       <Toaster richColors />
     </div>
