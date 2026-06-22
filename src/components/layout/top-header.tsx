@@ -10,7 +10,7 @@ function getTitle(pathname: string) {
   if (pathname.startsWith("/change-password")) return "Change Password";
   if (pathname.startsWith("/agents")) return "Agent Management";
   if (pathname.startsWith("/dashboard")) return "Dashboard";
-  if (pathname.startsWith("/staff")) return "Staff Administration";
+  if (pathname.startsWith("/staff")) return "Merchant Staff Administration";
   if (pathname.startsWith("/roles")) return "Roles & Permissions";
   return "SoftPOS Portal";
 }

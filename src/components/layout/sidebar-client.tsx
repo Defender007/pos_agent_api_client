@@ -59,7 +59,7 @@ export default function SidebarClient({ hasBankToken }: SidebarClientProps) {
         <>
           <Link href="/staff" className={itemClass("/staff")}>
             <UserCog size={18} />
-            Staff
+            Merchant Staff
           </Link>
 
           <Link href="/roles" className={itemClass("/roles")}>

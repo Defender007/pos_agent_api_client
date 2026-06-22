@@ -23,8 +23,8 @@ export default async function StaffPage() {
     <PageContainer>
       <div className="mb-6 flex items-center justify-between">
         <PageTitle
-          title="Staff Administration"
-          description="View staff profiles, roles, and access"
+          title="Merchant Staff Administration"
+          description="View merchant staff profiles, roles, and access"
         />
       </div>
 
