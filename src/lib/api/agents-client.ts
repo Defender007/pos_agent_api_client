@@ -1,5 +1,6 @@
 import { CreateAgentPayload } from "@/types/agent";
 import { UpdateAgentPayload } from "@/types/agent";
+import { parseApiError } from "@/lib/api/api-error";
 
 const API_BASE_URL = process.env.NEXT_PUBLIC_API_BASE_URL;
 
@@ -26,7 +27,7 @@ export async function updateAgentClient(
   });
 
   if (!response.ok) {
-    throw new Error("Failed to update agent");
+    throw await parseApiError(response);
   }
 
   return response.json();
@@ -44,7 +45,7 @@ export async function createAgentClient(payload: CreateAgentPayload) {
   });
 
   if (!response.ok) {
-    throw new Error("Failed to create agent");
+    throw await parseApiError(response);
   }
 
   return response.json();

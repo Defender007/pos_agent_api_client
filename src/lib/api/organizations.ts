@@ -31,8 +31,8 @@ export type Organization = {
 
 export async function createOrganization(payload: {
   name: string;
-  code?: string;
-  registration_number?: string;
+  code?: string | null;
+  registration_number?: string | null;
   contact_email?: string;
   contact_phone?: string;
   address?: string;

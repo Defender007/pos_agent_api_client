@@ -3,9 +3,11 @@
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
+import { toast } from "sonner";
 import { Agent, CreateAgentPayload, UpdateAgentPayload } from "@/types/agent";
 
 import { createAgentClient, updateAgentClient } from "@/lib/api/agents-client";
+import { Toaster } from "@/components/ui/sonner";
 
 import TextInput from "@/components/forms/text-input";
 import SelectInput from "@/components/forms/select-input";
@@ -36,6 +38,10 @@ export default function AgentForm({
   const hasCapturedLocation = latitude !== null && longitude !== null;
   const canCreateAgent =
     mode !== "create" || (Boolean(resolvedBusinessName) && hasCapturedLocation);
+  const statusOptions =
+    agent?.status === "active"
+      ? ["suspended", "rejected", "deactivated"]
+      : ["active", "pending", "suspended"];
 
   const [indemnityAccepted, setIndemnityAccepted] = useState(false);
 
@@ -85,25 +91,36 @@ export default function AgentForm({
         const formData = new FormData(e.currentTarget);
 
         if (mode === "create" && !resolvedBusinessName) {
-          alert("Business name could not be resolved for your organization.");
+          toast.error("Business name could not be resolved for your organization.");
           return;
         }
 
         if (mode === "create" && !indemnityAccepted) {
-          alert("Please accept the indemnity before creating the agent.");
+          toast.error("Please accept the indemnity before creating the agent.");
           return;
         }
 
         if (mode === "create" && !hasCapturedLocation) {
-          alert("Please capture the agent operating location before creating the agent.");
+          toast.error(
+            "Please capture the agent operating location before creating the agent.",
+          );
+          return;
+        }
+
+        const selectedStatus = String(formData.get("status"));
+
+        if (
+          agent?.status === "active" &&
+          (selectedStatus === "pending" ||
+            selectedStatus === "pending_approval")
+        ) {
+          toast.error("Active agents cannot be changed back to pending.");
           return;
         }
 
         const payload: CreateAgentPayload | UpdateAgentPayload = statusOnly
           ? {
-              status: String(
-                formData.get("status"),
-              ) as CreateAgentPayload["status"],
+              status: selectedStatus as CreateAgentPayload["status"],
             }
           : {
               agent_code: String(formData.get("agent_code")),
@@ -112,9 +129,7 @@ export default function AgentForm({
               phone: String(formData.get("phone")),
               email: String(formData.get("email")),
               business_name: String(formData.get("business_name")),
-              status: String(
-                formData.get("status"),
-              ) as CreateAgentPayload["status"],
+              status: selectedStatus as CreateAgentPayload["status"],
               kyc: {
                 bvn: String(formData.get("bvn")),
                 nin: String(formData.get("nin")),
@@ -151,11 +166,12 @@ export default function AgentForm({
           router.push("/agents");
         } catch (error) {
           console.error(error);
-
-          alert(
-            mode === "edit"
-              ? "Failed to update agent"
-              : "Failed to create agent",
+          toast.error(
+            error instanceof Error
+              ? error.message
+              : mode === "edit"
+                ? "Failed to update agent"
+                : "Failed to create agent",
           );
         }
       }}
@@ -165,7 +181,7 @@ export default function AgentForm({
         <SelectInput
           name="status"
           label="Status"
-          options={["active", "pending", "suspended"]}
+          options={statusOptions}
           defaultValue={agent?.status}
         />
       ) : (
@@ -248,7 +264,7 @@ export default function AgentForm({
           <SelectInput
             name="status"
             label="Status"
-            options={["active", "pending", "suspended"]}
+            options={statusOptions}
             defaultValue={isEdit ? agent?.status : undefined}
           />
           <TextArea
@@ -368,6 +384,8 @@ export default function AgentForm({
               : "Create Agent"}
         </button>
       </div>
+
+      <Toaster richColors />
     </form>
   );
 }

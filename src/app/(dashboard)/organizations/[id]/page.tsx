@@ -96,7 +96,7 @@ export default async function OrganizationDetailPage({ params }: Props) {
             </p>
 
             <p>
-              <strong>Registration Number:</strong>{" "}
+              <strong>Registration Number / RC Number:</strong>{" "}
               {organization.registration_number || "—"}
             </p>
 

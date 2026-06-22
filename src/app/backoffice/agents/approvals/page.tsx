@@ -8,23 +8,57 @@ import PageContainer from "@/components/layout/page-container";
 import PageTitle from "@/components/layout/page-title";
 import Sidebar from "@/components/layout/sidebar";
 import TopHeader from "@/components/layout/top-header";
-import {
-  getApprovedAgents,
-  getPendingApprovalAgents,
-  getRejectedAgents,
-} from "@/lib/api/bank-agents-server";
+import { getBankAdminAgents } from "@/lib/api/bank-agents-server";
 import { getServerPageError } from "@/lib/api/server-page-error";
 import type { BankAgent } from "@/types/bank-agent";
+
+type AgentStatusGroup =
+  | "pending"
+  | "active"
+  | "suspended"
+  | "rejected"
+  | "deactivated";
+
+const statusGroups: Record<AgentStatusGroup, string[]> = {
+  pending: ["pending", "pending_approval"],
+  active: ["active", "approved"],
+  suspended: ["suspended", "suspended_by_bank"],
+  rejected: ["rejected"],
+  deactivated: ["deactivated", "deactivated_by_bank"],
+};
 
 function getAgentName(agent: BankAgent) {
   return `${agent.first_name || ""} ${agent.last_name || ""}`.trim() || "—";
 }
 
-function statusPillClass(statusTone: "pending" | "approved" | "rejected") {
-  const styles = {
+function getStatusGroup(status?: string | null): AgentStatusGroup | null {
+  const normalizedStatus = status?.toLowerCase() || "";
+  const match = Object.entries(statusGroups).find(([, statuses]) =>
+    statuses.includes(normalizedStatus),
+  );
+
+  return (match?.[0] as AgentStatusGroup | undefined) || null;
+}
+
+function formatAgentStatus(status?: string | null) {
+  const group = getStatusGroup(status);
+
+  if (group === "pending") return "Pending Approval";
+  if (group === "active") return "Active";
+  if (group === "suspended") return "Suspended";
+  if (group === "rejected") return "Rejected";
+  if (group === "deactivated") return "Deactivated";
+
+  return status ? status.replaceAll("_", " ") : "—";
+}
+
+function statusPillClass(statusTone: AgentStatusGroup) {
+  const styles: Record<AgentStatusGroup, string> = {
     pending: "bg-[#FFF7D6] text-[#7A5A00]",
-    approved: "bg-[#E6F4EC] text-[#005C2E]",
+    active: "bg-[#E6F4EC] text-[#005C2E]",
+    suspended: "bg-[#FFF7D6] text-[#7A5A00]",
     rejected: "bg-red-100 text-red-700",
+    deactivated: "bg-slate-100 text-slate-700",
   };
 
   return `rounded-full px-3 py-1 text-xs font-semibold ${styles[statusTone]}`;
@@ -57,7 +91,7 @@ function AgentsTableSection({
   description: string;
   agents: BankAgent[];
   emptyMessage: string;
-  statusTone: "pending" | "approved" | "rejected";
+  statusTone: AgentStatusGroup;
 }) {
   const headers = [
     "Agent Code",
@@ -118,7 +152,7 @@ function AgentsTableSection({
 
                   <td className="px-6 py-4 text-sm">
                     <span className={statusPillClass(statusTone)}>
-                      {agent.status || "—"}
+                      {formatAgentStatus(agent.status)}
                     </span>
                   </td>
 
@@ -145,17 +179,31 @@ function AgentsTableSection({
 }
 
 export default async function AgentApprovalsPage() {
+  let agents: BankAgent[] = [];
   let pendingAgents: BankAgent[] = [];
-  let approvedAgents: BankAgent[] = [];
+  let activeAgents: BankAgent[] = [];
+  let suspendedAgents: BankAgent[] = [];
   let rejectedAgents: BankAgent[] = [];
+  let deactivatedAgents: BankAgent[] = [];
   let loadError: SectionErrorCardProps | null = null;
 
   try {
-    [pendingAgents, approvedAgents, rejectedAgents] = await Promise.all([
-      getPendingApprovalAgents(),
-      getApprovedAgents(),
-      getRejectedAgents(),
-    ]);
+    agents = await getBankAdminAgents();
+    pendingAgents = agents.filter(
+      (agent) => getStatusGroup(agent.status) === "pending",
+    );
+    activeAgents = agents.filter(
+      (agent) => getStatusGroup(agent.status) === "active",
+    );
+    suspendedAgents = agents.filter(
+      (agent) => getStatusGroup(agent.status) === "suspended",
+    );
+    rejectedAgents = agents.filter(
+      (agent) => getStatusGroup(agent.status) === "rejected",
+    );
+    deactivatedAgents = agents.filter(
+      (agent) => getStatusGroup(agent.status) === "deactivated",
+    );
   } catch (error) {
     if (error instanceof Error && error.message === "SESSION_EXPIRED") {
       redirect("/backoffice/login?session=expired");
@@ -202,11 +250,19 @@ export default async function AgentApprovalsPage() {
                 />
 
                 <AgentsTableSection
-                  title="Approved Agents"
-                  description="Agents approved by backoffice"
-                  agents={approvedAgents}
-                  emptyMessage="No approved agents found."
-                  statusTone="approved"
+                  title="Active Agents"
+                  description="Approved agents currently active"
+                  agents={activeAgents}
+                  emptyMessage="No active agents found."
+                  statusTone="active"
+                />
+
+                <AgentsTableSection
+                  title="Suspended Agents"
+                  description="Agents suspended by bank review"
+                  agents={suspendedAgents}
+                  emptyMessage="No suspended agents found."
+                  statusTone="suspended"
                 />
 
                 <AgentsTableSection
@@ -215,6 +271,14 @@ export default async function AgentApprovalsPage() {
                   agents={rejectedAgents}
                   emptyMessage="No rejected agents found."
                   statusTone="rejected"
+                />
+
+                <AgentsTableSection
+                  title="Deactivated Agents"
+                  description="Agents deactivated by bank review"
+                  agents={deactivatedAgents}
+                  emptyMessage="No deactivated agents found."
+                  statusTone="deactivated"
                 />
               </>
             )}
