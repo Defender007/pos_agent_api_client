@@ -41,6 +41,7 @@ export default function NewOrganizationPage() {
           const registrationNumber = String(
             formData.get("registration_number") || "",
           ).trim();
+          const organizationCode = String(formData.get("code") || "").trim();
 
           if (businessSegment === "others" && !businessSegmentOther) {
             toast.error("Please specify the other business industry.");
@@ -51,7 +52,7 @@ export default function NewOrganizationPage() {
           try {
             await createOrganization({
               name: String(formData.get("name")),
-              code: String(formData.get("code") || ""),
+              code: organizationCode || null,
               registration_number: registrationNumber || null,
               contact_email: String(formData.get("contact_email") || ""),
               contact_phone: String(formData.get("contact_phone") || ""),
@@ -78,7 +79,11 @@ export default function NewOrganizationPage() {
       >
         {[
           ["name", "Organization Name", "Enter organization name"],
-          ["code", "Organization Code", "Enter organization code"],
+          [
+            "code",
+            "Organization Code",
+            "Enter organization code, if applicable",
+          ],
           [
             "registration_number",
             "Registration Number / RC Number",
