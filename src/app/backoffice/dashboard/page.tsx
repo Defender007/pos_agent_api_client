@@ -134,7 +134,7 @@ export default async function BackofficeDashboardPage() {
             />
 
             <SummaryCard
-              title="Staff"
+              title="Merchant Staff"
               value={staffCount}
               href="/staff"
               tone="bg-white text-slate-900"
