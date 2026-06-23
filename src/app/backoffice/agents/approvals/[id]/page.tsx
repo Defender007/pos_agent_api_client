@@ -1,6 +1,10 @@
 import Link from "next/link";
 import { redirect } from "next/navigation";
 
+import {
+  AgentStatusBadge,
+  AgentTypeBadge,
+} from "@/components/agents/agent-badges";
 import AgentApprovalActions from "@/components/agents/agent-approval-actions";
 import SectionErrorCard, {
   type SectionErrorCardProps,
@@ -12,6 +16,7 @@ import TopHeader from "@/components/layout/top-header";
 import SectionCard from "@/components/ui/custom/section-card";
 import { getBankAgentById } from "@/lib/api/bank-agents-server";
 import { getServerPageError } from "@/lib/api/server-page-error";
+import { formatAgentStatus, formatAgentType } from "@/lib/agent-display";
 import { getBusinessSegmentLabel } from "@/lib/business-segments";
 import type { BankAgent } from "@/types/bank-agent";
 
@@ -57,42 +62,6 @@ function getOrganizationName(agent: BankAgent) {
   }
 
   return agent.organization_id || "—";
-}
-
-function AgentTypeBadge({ agentType }: { agentType?: string | null }) {
-  const isSolopreneur = agentType === "solopreneur";
-
-  return (
-    <span
-      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-        isSolopreneur
-          ? "bg-[#FFF7D6] text-[#005C2E]"
-          : "bg-slate-100 text-slate-700"
-      }`}
-    >
-      {isSolopreneur ? "Solopreneur Agent" : "Standard Agent"}
-    </span>
-  );
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const normalizedStatus = status.toLowerCase();
-  const tone =
-    normalizedStatus === "active" || normalizedStatus === "approved"
-      ? "bg-[#E6F4EC] text-[#005C2E]"
-      : normalizedStatus === "pending" ||
-          normalizedStatus === "pending_approval"
-        ? "bg-[#FFF7D6] text-[#7A5A00]"
-        : normalizedStatus === "rejected" ||
-            normalizedStatus === "suspended"
-          ? "bg-red-100 text-red-700"
-          : "bg-slate-100 text-slate-700";
-
-  return (
-    <span className={`rounded-full px-3 py-1 text-xs font-semibold ${tone}`}>
-      {status.replaceAll("_", " ")}
-    </span>
-  );
 }
 
 export default async function BankAgentReviewPage({
@@ -163,7 +132,7 @@ export default async function BankAgentReviewPage({
 
           <div className="flex flex-wrap items-center gap-2">
             <AgentTypeBadge agentType={agent.agent_type} />
-            <StatusBadge status={agent.status} />
+            <AgentStatusBadge status={agent.status} />
           </div>
         </div>
 
@@ -176,11 +145,7 @@ export default async function BankAgentReviewPage({
               <DetailItem label="Agent Code" value={agent.agent_code} />
               <DetailItem
                 label="Agent Type"
-                value={
-                  agent.agent_type === "solopreneur"
-                    ? "Solopreneur"
-                    : "Standard"
-                }
+                value={formatAgentType(agent.agent_type)}
               />
               <DetailItem label="First Name" value={agent.first_name} />
               <DetailItem label="Middle Name" value={agent.middle_name} />
@@ -194,7 +159,7 @@ export default async function BankAgentReviewPage({
               <DetailItem label="TID" value={agent.tid} />
               <DetailItem
                 label="Status"
-                value={agent.status.replaceAll("_", " ")}
+                value={formatAgentStatus(agent.status)}
               />
             </div>
           </SectionCard>

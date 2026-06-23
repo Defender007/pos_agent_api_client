@@ -4,11 +4,27 @@ import Link from "next/link";
 import SectionErrorCard, {
   type SectionErrorCardProps,
 } from "@/components/common/section-error-card";
+import {
+  AgentStatusBadge,
+  AgentTypeBadge,
+} from "@/components/agents/agent-badges";
+import {
+  ClearFiltersButton,
+  FilterSelect,
+  ListToolbar,
+  PageSizeSelect,
+  PaginationControls,
+  SearchInput,
+  SortControls,
+  EmptyState,
+} from "@/components/list/list-controls";
 import PageContainer from "@/components/layout/page-container";
 import PageTitle from "@/components/layout/page-title";
 import Sidebar from "@/components/layout/sidebar";
 import TopHeader from "@/components/layout/top-header";
 import { getBankAdminAgents } from "@/lib/api/bank-agents-server";
+import type { PaginatedData } from "@/lib/api/pagination";
+import { getListQuery, type PageSearchParams } from "@/lib/list-query";
 import { getServerPageError } from "@/lib/api/server-page-error";
 import type { BankAgent } from "@/types/bank-agent";
 
@@ -40,58 +56,10 @@ function getStatusGroup(status?: string | null): AgentStatusGroup | null {
   return (match?.[0] as AgentStatusGroup | undefined) || null;
 }
 
-function formatAgentStatus(status?: string | null) {
-  const group = getStatusGroup(status);
-
-  if (group === "pending") return "Pending Approval";
-  if (group === "active") return "Active";
-  if (group === "suspended") return "Suspended";
-  if (group === "rejected") return "Rejected";
-  if (group === "deactivated") return "Deactivated";
-
-  return status ? status.replaceAll("_", " ") : "—";
-}
-
-function statusPillClass(statusTone: AgentStatusGroup) {
-  const styles: Record<AgentStatusGroup, string> = {
-    pending: "bg-[#FFF7D6] text-[#7A5A00]",
-    active: "bg-[#E6F4EC] text-[#005C2E]",
-    suspended: "bg-[#FFF7D6] text-[#7A5A00]",
-    rejected: "bg-red-100 text-red-700",
-    deactivated: "bg-slate-100 text-slate-700",
-  };
-
-  return `rounded-full px-3 py-1 text-xs font-semibold ${styles[statusTone]}`;
-}
-
-function AgentTypeBadge({ agentType }: { agentType?: string | null }) {
-  const isSolopreneur = agentType === "solopreneur";
-
-  return (
-    <span
-      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-        isSolopreneur
-          ? "bg-[#FFF7D6] text-[#005C2E]"
-          : "bg-slate-100 text-slate-700"
-      }`}
-    >
-      {isSolopreneur ? "Solopreneur Agent" : "Standard Agent"}
-    </span>
-  );
-}
-
-function AgentsTableSection({
-  title,
-  description,
+function AgentsTable({
   agents,
-  emptyMessage,
-  statusTone,
 }: {
-  title: string;
-  description: string;
   agents: BankAgent[];
-  emptyMessage: string;
-  statusTone: AgentStatusGroup;
 }) {
   const headers = [
     "Agent Code",
@@ -104,26 +72,28 @@ function AgentsTableSection({
   ];
 
   return (
-    <div className="mt-8 min-w-0 rounded-2xl border bg-white p-4 shadow-sm sm:p-6">
-      <div className="mb-5">
-        <h2 className="text-xl font-bold text-slate-900">{title}</h2>
-
-        <p className="text-sm text-slate-500">{description}</p>
-      </div>
-
+    <>
       {agents.length === 0 ? (
-        <div className="rounded-xl border border-dashed px-6 py-10 text-center">
-          <p className="text-sm text-slate-500">{emptyMessage}</p>
+        <div className="p-4">
+          <EmptyState message="No agents match the current filters." />
         </div>
       ) : (
-        <div className="max-w-full overflow-x-auto rounded-xl border">
-          <table className="w-full min-w-[900px]">
+        <div className="w-full overflow-x-auto rounded-xl border">
+          <table className="w-full min-w-[900px] table-auto">
             <thead className="bg-slate-50">
               <tr>
                 {headers.map((header) => (
                   <th
                     key={header}
-                    className="px-6 py-4 text-left text-sm font-semibold text-slate-600"
+                    className={`px-6 py-4 text-sm font-semibold text-slate-600 align-middle ${
+                      header === "Actions"
+                        ? "whitespace-nowrap text-right"
+                        : "text-left"
+                    } ${
+                      ["Agent Code", "Agent Type", "Status", "TID"].includes(header)
+                        ? "whitespace-nowrap"
+                        : "min-w-[150px]"
+                    }`}
                   >
                     {header}
                   </th>
@@ -132,35 +102,36 @@ function AgentsTableSection({
             </thead>
 
             <tbody className="divide-y divide-slate-200">
-              {agents.map((agent) => (
-                <tr key={agent.id} className="hover:bg-slate-50">
-                  <td className="px-6 py-4 text-sm font-semibold text-slate-900">
+              {agents.map((agent) => {
+                const statusTone = getStatusGroup(agent.status) || "pending";
+
+                return (
+                  <tr key={agent.id} className="hover:bg-slate-50">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm font-semibold text-slate-900 align-middle">
                     {agent.agent_code || "—"}
                   </td>
 
-                  <td className="px-6 py-4 text-sm text-slate-700">
+                  <td className="min-w-[150px] px-6 py-4 text-sm text-slate-700 align-middle">
                     {getAgentName(agent)}
                   </td>
 
-                  <td className="px-6 py-4 text-sm text-slate-700">
+                  <td className="min-w-[150px] px-6 py-4 text-sm text-slate-700 align-middle">
                     {agent.business_name || "—"}
                   </td>
 
-                  <td className="px-6 py-4 text-sm">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm align-middle">
                     <AgentTypeBadge agentType={agent.agent_type} />
                   </td>
 
-                  <td className="px-6 py-4 text-sm">
-                    <span className={statusPillClass(statusTone)}>
-                      {formatAgentStatus(agent.status)}
-                    </span>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm align-middle">
+                    <AgentStatusBadge status={agent.status} />
                   </td>
 
-                  <td className="px-6 py-4 text-sm text-slate-700">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-700 align-middle">
                     {agent.tid || "—"}
                   </td>
 
-                  <td className="px-6 py-4 text-sm">
+                  <td className="whitespace-nowrap px-6 py-4 text-right text-sm align-middle">
                     <Link
                       href={`/backoffice/agents/approvals/${agent.id}`}
                       className="inline-flex rounded-lg border border-[#BFDCCB] px-3 py-2 font-semibold text-[#005C2E] transition hover:bg-[#E6F4EC]"
@@ -168,42 +139,60 @@ function AgentsTableSection({
                       {statusTone === "pending" ? "Review" : "View Details"}
                     </Link>
                   </td>
-                </tr>
-              ))}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       )}
-    </div>
+    </>
   );
 }
 
-export default async function AgentApprovalsPage() {
-  let agents: BankAgent[] = [];
-  let pendingAgents: BankAgent[] = [];
-  let activeAgents: BankAgent[] = [];
-  let suspendedAgents: BankAgent[] = [];
-  let rejectedAgents: BankAgent[] = [];
-  let deactivatedAgents: BankAgent[] = [];
+type Props = {
+  searchParams: Promise<PageSearchParams>;
+};
+
+const bankAgentSortOptions = [
+  { label: "Newest", value: "created_at" },
+  { label: "Agent Code", value: "agent_code" },
+  { label: "Business Name", value: "business_name" },
+  { label: "Status", value: "status" },
+];
+
+const businessSegmentOptions = [
+  { label: "All industries", value: "" },
+  { label: "Fast Foods", value: "fast_foods" },
+  { label: "Hotels/GuestHouses", value: "hotels_guesthouses" },
+  { label: "Fuel Stations", value: "fuel_stations" },
+  { label: "Airlines Operations", value: "airlines_operations" },
+  { label: "Restaurants", value: "restaurants" },
+  { label: "Logistics/Courier", value: "logistics_courier" },
+  { label: "Wholesale", value: "wholesale" },
+  { label: "Church/NGO", value: "church_ngo" },
+  { label: "Stores/Supermarkets", value: "stores_supermarkets" },
+  { label: "MDAs", value: "mdas" },
+  { label: "Others", value: "others" },
+];
+
+export default async function AgentApprovalsPage({ searchParams }: Props) {
+  const query = getListQuery(await searchParams, {
+    defaultSortBy: "created_at",
+    allowedFilters: [
+      "status",
+      "agent_type",
+      "organization_id",
+      "business_segment",
+      "has_tid",
+    ],
+  });
+
+  let agents: PaginatedData<BankAgent> | null = null;
   let loadError: SectionErrorCardProps | null = null;
 
   try {
-    agents = await getBankAdminAgents();
-    pendingAgents = agents.filter(
-      (agent) => getStatusGroup(agent.status) === "pending",
-    );
-    activeAgents = agents.filter(
-      (agent) => getStatusGroup(agent.status) === "active",
-    );
-    suspendedAgents = agents.filter(
-      (agent) => getStatusGroup(agent.status) === "suspended",
-    );
-    rejectedAgents = agents.filter(
-      (agent) => getStatusGroup(agent.status) === "rejected",
-    );
-    deactivatedAgents = agents.filter(
-      (agent) => getStatusGroup(agent.status) === "deactivated",
-    );
+    agents = await getBankAdminAgents(query);
   } catch (error) {
     if (error instanceof Error && error.message === "SESSION_EXPIRED") {
       redirect("/backoffice/login?session=expired");
@@ -239,49 +228,79 @@ export default async function AgentApprovalsPage() {
 
             {loadError ? (
               <SectionErrorCard {...loadError} />
-            ) : (
-              <>
-                <AgentsTableSection
-                  title="Pending Approval Agents"
-                  description="Agents awaiting backoffice review"
-                  agents={pendingAgents}
-                  emptyMessage="No agents are currently pending approval."
-                  statusTone="pending"
-                />
+            ) : agents ? (
+              <div className="mt-8 min-w-0 overflow-hidden rounded-2xl border bg-white shadow-sm">
+                <div className="border-b border-slate-200 p-4">
+                <ListToolbar>
+                  <SearchInput placeholder="Search agents" />
 
-                <AgentsTableSection
-                  title="Active Agents"
-                  description="Approved agents currently active"
-                  agents={activeAgents}
-                  emptyMessage="No active agents found."
-                  statusTone="active"
-                />
+                  <div className="flex flex-wrap items-end gap-3">
+                    <FilterSelect
+                      label="Status"
+                      paramName="status"
+                      options={[
+                        { label: "All", value: "" },
+                        { label: "Pending", value: "pending" },
+                        { label: "Active", value: "active" },
+                        { label: "Suspended", value: "suspended" },
+                        { label: "Rejected", value: "rejected" },
+                        { label: "Deactivated", value: "deactivated" },
+                      ]}
+                    />
+                    <FilterSelect
+                      label="Agent type"
+                      paramName="agent_type"
+                      options={[
+                        { label: "All types", value: "" },
+                        { label: "Standard", value: "standard" },
+                        { label: "Solopreneur", value: "solopreneur" },
+                      ]}
+                    />
+                    <FilterSelect
+                      label="Industry"
+                      paramName="business_segment"
+                      options={businessSegmentOptions}
+                    />
+                    <SearchInput
+                      label="Organisation"
+                      placeholder="Organisation ID"
+                      paramName="organization_id"
+                      widthClass="sm:w-[220px]"
+                    />
+                    <FilterSelect
+                      label="Has TID"
+                      paramName="has_tid"
+                      options={[
+                        { label: "Any", value: "" },
+                        { label: "With TID", value: "true" },
+                        { label: "Without TID", value: "false" },
+                      ]}
+                    />
+                  </div>
 
-                <AgentsTableSection
-                  title="Suspended Agents"
-                  description="Agents suspended by bank review"
-                  agents={suspendedAgents}
-                  emptyMessage="No suspended agents found."
-                  statusTone="suspended"
-                />
+                  <div className="flex flex-wrap items-end gap-3">
+                    <SortControls options={bankAgentSortOptions} />
+                    <PageSizeSelect />
+                    <ClearFiltersButton
+                      params={[
+                        "search",
+                        "status",
+                        "agent_type",
+                        "organization_id",
+                        "business_segment",
+                        "has_tid",
+                        "sort_by",
+                        "sort_order",
+                      ]}
+                    />
+                  </div>
+                </ListToolbar>
+                </div>
 
-                <AgentsTableSection
-                  title="Rejected Agents"
-                  description="Agents rejected by backoffice"
-                  agents={rejectedAgents}
-                  emptyMessage="No rejected agents found."
-                  statusTone="rejected"
-                />
-
-                <AgentsTableSection
-                  title="Deactivated Agents"
-                  description="Agents deactivated by bank review"
-                  agents={deactivatedAgents}
-                  emptyMessage="No deactivated agents found."
-                  statusTone="deactivated"
-                />
-              </>
-            )}
+                <AgentsTable agents={agents.items} />
+                <PaginationControls data={agents} />
+              </div>
+            ) : null}
           </PageContainer>
         </div>
       </main>

@@ -67,13 +67,13 @@ export default async function BackofficeDashboardPage() {
       getBankadminPermissions(),
     ]);
 
-    organizationsCount = organizations.length;
-    pendingAgentsCount = pendingAgents.length;
-    approvedAgentsCount = approvedAgents.length;
-    rejectedAgentsCount = rejectedAgents.length;
-    staffCount = staff.length;
-    rolesCount = roles.length;
-    permissionsCount = permissions.length;
+    organizationsCount = organizations.pagination.total_items;
+    pendingAgentsCount = pendingAgents.pagination.total_items;
+    approvedAgentsCount = approvedAgents.pagination.total_items;
+    rejectedAgentsCount = rejectedAgents.pagination.total_items;
+    staffCount = staff.pagination.total_items;
+    rolesCount = roles.pagination.total_items;
+    permissionsCount = permissions.pagination.total_items;
   } catch (error) {
     loadError = getServerPageError(error, {
       sessionExpiredRedirect: "/backoffice/login?session=expired",

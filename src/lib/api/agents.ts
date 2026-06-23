@@ -2,21 +2,30 @@ import { Agent } from "@/types/agent";
 import { cookies } from "next/headers";
 import { CreateAgentPayload } from "@/types/agent";
 import { getServerApiBaseUrl } from "@/lib/api/api-config";
+import {
+  mapPaginatedItems,
+  normalizePaginatedData,
+  type ListQuery,
+  type PaginatedData,
+  withListQuery,
+} from "@/lib/api/pagination";
 
 const API_BASE_URL = getServerApiBaseUrl();
+
+type AgentListApiItem = {
+  id: string;
+  agent_code: string;
+  first_name: string;
+  last_name: string;
+  phone: string;
+  business_name: string;
+  status: Agent["status"];
+};
 
 type AgentApiResponse = {
   success: boolean;
   message: string;
-  data: {
-    id: string;
-    agent_code: string;
-    first_name: string;
-    last_name: string;
-    phone: string;
-    business_name: string;
-    status: Agent["status"];
-  }[];
+  data: AgentListApiItem[] | PaginatedData<AgentListApiItem>;
 };
 
 type SingleAgentApiResponse = {
@@ -57,10 +66,23 @@ type SingleAgentApiResponse = {
   };
 };
 
-export async function getAgents(): Promise<Agent[]> {
+function mapAgentListItem(agent: AgentListApiItem): Agent {
+  return {
+    id: agent.id,
+    agentCode: agent.agent_code,
+    fullName: `${agent.first_name} ${agent.last_name}`,
+    phone: agent.phone,
+    businessName: agent.business_name,
+    status: agent.status,
+  };
+}
+
+export async function getAgents(
+  query: ListQuery = {},
+): Promise<PaginatedData<Agent>> {
   const cookieStore = await cookies();
   const token = cookieStore.get("access_token")?.value;
-  const response = await fetch(`${API_BASE_URL}/agents`, {
+  const response = await fetch(withListQuery(`${API_BASE_URL}/agents`, query), {
     cache: "no-store",
     headers: {
       Authorization: `Bearer ${token}`,
@@ -75,15 +97,9 @@ export async function getAgents(): Promise<Agent[]> {
   }
 
   const result: AgentApiResponse = await response.json();
+  const paginated = normalizePaginatedData(result.data, query);
 
-  return result.data.map((agent) => ({
-    id: agent.id,
-    agentCode: agent.agent_code,
-    fullName: `${agent.first_name} ${agent.last_name}`,
-    phone: agent.phone,
-    businessName: agent.business_name,
-    status: agent.status,
-  }));
+  return mapPaginatedItems(paginated, mapAgentListItem);
 }
 
 export async function getAgentById(agentId: string): Promise<Agent> {

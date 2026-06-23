@@ -1,4 +1,10 @@
 import { parseApiError } from "@/lib/api/api-error";
+import {
+  normalizePaginatedData,
+  type ListQuery,
+  type PaginatedData,
+  withListQuery,
+} from "@/lib/api/pagination";
 import type {
   BankAgent,
   BankAgentReviewPayload,
@@ -14,10 +20,13 @@ function getCookie(name: string) {
     ?.split("=")[1];
 }
 
-async function getBankAgents(path: string): Promise<BankAgent[]> {
+async function getBankAgents(
+  path: string,
+  query: ListQuery = {},
+): Promise<PaginatedData<BankAgent>> {
   const token = getCookie("bank_access_token");
 
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+  const response = await fetch(withListQuery(`${API_BASE_URL}${path}`, query), {
     cache: "no-store",
     headers: {
       "Content-Type": "application/json",
@@ -31,19 +40,25 @@ async function getBankAgents(path: string): Promise<BankAgent[]> {
 
   const result = await response.json();
 
-  return result.data;
+  return normalizePaginatedData(result.data, query);
 }
 
-export function getPendingApprovalAgents(): Promise<BankAgent[]> {
-  return getBankAgents("/agents/pending-approval");
+export function getPendingApprovalAgents(
+  query?: ListQuery,
+): Promise<PaginatedData<BankAgent>> {
+  return getBankAgents("/agents/pending-approval", query);
 }
 
-export function getApprovedAgents(): Promise<BankAgent[]> {
-  return getBankAgents("/agents/approved");
+export function getApprovedAgents(
+  query?: ListQuery,
+): Promise<PaginatedData<BankAgent>> {
+  return getBankAgents("/agents/approved", query);
 }
 
-export function getRejectedAgents(): Promise<BankAgent[]> {
-  return getBankAgents("/agents/rejected");
+export function getRejectedAgents(
+  query?: ListQuery,
+): Promise<PaginatedData<BankAgent>> {
+  return getBankAgents("/agents/rejected", query);
 }
 
 export async function bankReviewAgent(

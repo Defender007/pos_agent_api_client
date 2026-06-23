@@ -2,6 +2,12 @@ import { cookies } from "next/headers";
 
 import { getServerApiBaseUrl } from "@/lib/api/api-config";
 import { parseApiError } from "@/lib/api/api-error";
+import {
+  normalizePaginatedData,
+  type ListQuery,
+  type PaginatedData,
+  withListQuery,
+} from "@/lib/api/pagination";
 import type { BankAgent, BankAgentReviewPayload } from "@/types/bank-agent";
 
 const API_BASE_URL = getServerApiBaseUrl();
@@ -16,8 +22,11 @@ async function getBankAuthHeaders() {
   };
 }
 
-async function getBankAgents(path: string): Promise<BankAgent[]> {
-  const response = await fetch(`${API_BASE_URL}${path}`, {
+async function getBankAgents(
+  path: string,
+  query: ListQuery = {},
+): Promise<PaginatedData<BankAgent>> {
+  const response = await fetch(withListQuery(`${API_BASE_URL}${path}`, query), {
     cache: "no-store",
     headers: await getBankAuthHeaders(),
   });
@@ -28,23 +37,31 @@ async function getBankAgents(path: string): Promise<BankAgent[]> {
 
   const result = await response.json();
 
-  return result.data;
+  return normalizePaginatedData(result.data, query);
 }
 
-export function getPendingApprovalAgents(): Promise<BankAgent[]> {
-  return getBankAgents("/agents/pending-approval");
+export function getPendingApprovalAgents(
+  query?: ListQuery,
+): Promise<PaginatedData<BankAgent>> {
+  return getBankAgents("/agents/pending-approval", query);
 }
 
-export function getApprovedAgents(): Promise<BankAgent[]> {
-  return getBankAgents("/agents/approved");
+export function getApprovedAgents(
+  query?: ListQuery,
+): Promise<PaginatedData<BankAgent>> {
+  return getBankAgents("/agents/approved", query);
 }
 
-export function getRejectedAgents(): Promise<BankAgent[]> {
-  return getBankAgents("/agents/rejected");
+export function getRejectedAgents(
+  query?: ListQuery,
+): Promise<PaginatedData<BankAgent>> {
+  return getBankAgents("/agents/rejected", query);
 }
 
-export function getBankAdminAgents(): Promise<BankAgent[]> {
-  return getBankAgents("/bankadmin/agents");
+export function getBankAdminAgents(
+  query?: ListQuery,
+): Promise<PaginatedData<BankAgent>> {
+  return getBankAgents("/bankadmin/agents", query);
 }
 
 export async function getBankAgentById(agentId: string): Promise<BankAgent> {
