@@ -11,6 +11,7 @@ import SectionErrorCard, {
 import {
   ClearFiltersButton,
   EmptyState,
+  ListToolbar,
   PageSizeSelect,
   PaginationControls,
   SearchInput,
@@ -64,13 +65,15 @@ export default async function PermissionsPage({ searchParams }: Props) {
         <SectionErrorCard {...loadError} />
       ) : permissions ? (
       <div className="rounded-2xl border bg-white shadow-sm">
-        <div className="grid gap-3 border-b border-slate-200 p-4 lg:grid-cols-[minmax(220px,1fr)_auto]">
+        <div className="border-b border-slate-200 p-4">
+        <ListToolbar>
           <SearchInput placeholder="Search permissions" />
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap items-end gap-3">
             <SortControls options={permissionSortOptions} />
             <PageSizeSelect />
             <ClearFiltersButton params={["search", "sort_by", "sort_order"]} />
           </div>
+        </ListToolbar>
         </div>
 
         {permissions.items.length === 0 ? (

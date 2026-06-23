@@ -7,6 +7,7 @@ import SectionErrorCard, {
 import {
   ClearFiltersButton,
   FilterSelect,
+  ListToolbar,
   PageSizeSelect,
   PaginationControls,
   SearchInput,
@@ -93,10 +94,11 @@ export default async function AgentsPage({ searchParams }: Props) {
         <SectionErrorCard {...loadError} />
       ) : agents ? (
         <div className="rounded-2xl border bg-white shadow-sm">
-          <div className="grid gap-3 border-b border-slate-200 p-4 lg:grid-cols-[minmax(220px,1fr)_auto_auto]">
+          <div className="border-b border-slate-200 p-4">
+          <ListToolbar>
             <SearchInput placeholder="Search agents" />
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap items-end gap-3">
               <FilterSelect
                 label="Status"
                 paramName="status"
@@ -124,8 +126,10 @@ export default async function AgentsPage({ searchParams }: Props) {
                 options={businessSegmentOptions}
               />
               <SearchInput
-                placeholder="Organization ID"
+                label="Organisation"
+                placeholder="Organisation ID"
                 paramName="organization_id"
+                widthClass="sm:w-[220px]"
               />
               <FilterSelect
                 label="Has TID"
@@ -138,7 +142,7 @@ export default async function AgentsPage({ searchParams }: Props) {
               />
             </div>
 
-            <div className="flex flex-wrap gap-3">
+            <div className="flex flex-wrap items-end gap-3">
               <SortControls options={agentSortOptions} />
               <PageSizeSelect />
               <ClearFiltersButton
@@ -154,6 +158,7 @@ export default async function AgentsPage({ searchParams }: Props) {
                 ]}
               />
             </div>
+          </ListToolbar>
           </div>
 
           <AgentsTable agents={agents.items} />

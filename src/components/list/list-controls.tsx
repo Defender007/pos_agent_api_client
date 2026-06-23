@@ -1,6 +1,7 @@
 "use client";
 
 import { useEffect, useMemo, useState } from "react";
+import type { ReactNode } from "react";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 
 import type { PaginatedData } from "@/lib/api/pagination";
@@ -11,6 +12,25 @@ type Option = {
 };
 
 const PAGE_SIZES = ["10", "20", "50", "100"];
+const labelClass = "space-y-1.5 text-xs font-medium text-slate-600";
+const controlClass =
+  "h-10 rounded-lg border border-slate-300 bg-white px-3 text-sm font-medium text-slate-700 outline-none transition focus:border-[#007A3D] focus:ring-2 focus:ring-[#E6F4EC]";
+
+export function ListToolbar({
+  children,
+  className = "",
+}: {
+  children: ReactNode;
+  className?: string;
+}) {
+  return (
+    <div
+      className={`flex flex-col gap-3 rounded-xl border border-slate-200 bg-white p-4 sm:flex-row sm:flex-wrap sm:items-end ${className}`}
+    >
+      {children}
+    </div>
+  );
+}
 
 function useQueryUpdater() {
   const router = useRouter();
@@ -47,13 +67,17 @@ function useQueryUpdater() {
 }
 
 export function SearchInput({
+  label = "Search",
   placeholder = "Search",
   paramName = "search",
   pageParam = "page",
+  widthClass = "sm:w-[240px]",
 }: {
+  label?: string;
   placeholder?: string;
   paramName?: string;
   pageParam?: string;
+  widthClass?: string;
 }) {
   const query = useQueryUpdater();
   const [value, setValue] = useState(query.get(paramName) || "");
@@ -69,24 +93,27 @@ export function SearchInput({
   }, [pageParam, paramName, query, value]);
 
   return (
-    <div className="flex min-w-0 flex-1 rounded-xl border border-slate-300 bg-white">
-      <input
-        value={value}
-        onChange={(event) => setValue(event.target.value)}
-        placeholder={placeholder}
-        className="min-w-0 flex-1 rounded-l-xl px-4 py-3 text-sm outline-none"
-      />
+    <label className={`block w-full ${widthClass} ${labelClass}`}>
+      {label}
+      <div className="flex h-10 min-w-0 rounded-lg border border-slate-300 bg-white focus-within:border-[#007A3D] focus-within:ring-2 focus-within:ring-[#E6F4EC]">
+        <input
+          value={value}
+          onChange={(event) => setValue(event.target.value)}
+          placeholder={placeholder}
+          className="h-full min-w-0 flex-1 rounded-l-lg px-3 text-sm outline-none"
+        />
 
-      {value ? (
-        <button
-          type="button"
-          onClick={() => setValue("")}
-          className="px-3 text-sm font-semibold text-slate-500 hover:text-[#005C2E]"
-        >
-          Clear
-        </button>
-      ) : null}
-    </div>
+        {value ? (
+          <button
+            type="button"
+            onClick={() => setValue("")}
+            className="h-full px-3 text-xs font-semibold text-slate-500 hover:text-[#005C2E]"
+          >
+            Clear
+          </button>
+        ) : null}
+      </div>
+    </label>
   );
 }
 
@@ -95,23 +122,25 @@ export function FilterSelect({
   paramName,
   options,
   pageParam = "page",
+  widthClass = "sm:w-[170px]",
 }: {
   label: string;
   paramName: string;
   options: Option[];
   pageParam?: string;
+  widthClass?: string;
 }) {
   const query = useQueryUpdater();
 
   return (
-    <label className="grid gap-1 text-xs font-semibold text-slate-500">
+    <label className={`block w-full ${widthClass} ${labelClass}`}>
       {label}
       <select
         value={query.get(paramName) || ""}
         onChange={(event) =>
           query.set({ [paramName]: event.target.value || null }, pageParam)
         }
-        className="min-w-40 rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm font-medium text-slate-700"
+        className={`w-full ${controlClass}`}
       >
         {options.map((option) => (
           <option key={option.value || "all"} value={option.value}>
@@ -138,15 +167,15 @@ export function SortControls({
   const sortOrder = query.get(sortOrderParam) === "asc" ? "asc" : "desc";
 
   return (
-    <div className="flex flex-wrap gap-3">
-      <label className="grid gap-1 text-xs font-semibold text-slate-500">
+    <div className="flex w-full flex-col gap-3 sm:w-auto sm:flex-row sm:items-end">
+      <label className={`block w-full sm:w-[170px] ${labelClass}`}>
         Sort by
         <select
           value={query.get(sortByParam) || options[0]?.value || "created_at"}
           onChange={(event) =>
             query.set({ [sortByParam]: event.target.value }, pageParam)
           }
-          className="min-w-40 rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm font-medium text-slate-700"
+          className={`w-full ${controlClass}`}
         >
           {options.map((option) => (
             <option key={option.value} value={option.value}>
@@ -164,7 +193,7 @@ export function SortControls({
             pageParam,
           )
         }
-        className="self-end rounded-xl border border-[#BFDCCB] px-4 py-3 text-sm font-semibold text-[#005C2E] hover:bg-[#E6F4EC]"
+        className="h-10 w-full rounded-lg border border-[#BFDCCB] px-4 text-sm font-semibold text-[#005C2E] hover:bg-[#E6F4EC] sm:w-[112px]"
       >
         {sortOrder === "asc" ? "Ascending" : "Descending"}
       </button>
@@ -182,14 +211,14 @@ export function PageSizeSelect({
   const query = useQueryUpdater();
 
   return (
-    <label className="grid gap-1 text-xs font-semibold text-slate-500">
+    <label className={`block w-full sm:w-[90px] ${labelClass}`}>
       Page size
       <select
         value={query.get(paramName) || "20"}
         onChange={(event) =>
           query.set({ [paramName]: event.target.value }, pageParam)
         }
-        className="rounded-xl border border-slate-300 bg-white px-3 py-3 text-sm font-medium text-slate-700"
+        className={`w-full ${controlClass}`}
       >
         {PAGE_SIZES.map((size) => (
           <option key={size} value={size}>
@@ -219,7 +248,7 @@ export function ClearFiltersButton({
           pageParam,
         )
       }
-      className="self-end rounded-xl border border-slate-300 px-4 py-3 text-sm font-semibold text-slate-700 hover:bg-slate-100"
+      className="h-10 w-full rounded-lg border border-slate-300 px-4 text-sm font-semibold text-slate-700 hover:bg-slate-100 sm:w-auto"
     >
       Clear Filters
     </button>
@@ -255,7 +284,7 @@ export function PaginationControls<T>({
           onClick={() =>
             query.set({ [pageParam]: Math.max(pagination.page - 1, 1) })
           }
-          className="rounded-xl border border-slate-300 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+          className="h-9 rounded-lg border border-slate-300 px-4 font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Previous
         </button>
@@ -264,7 +293,7 @@ export function PaginationControls<T>({
           type="button"
           disabled={!pagination.has_next}
           onClick={() => query.set({ [pageParam]: pagination.page + 1 })}
-          className="rounded-xl border border-slate-300 px-4 py-2 font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
+          className="h-9 rounded-lg border border-slate-300 px-4 font-semibold text-slate-700 hover:bg-slate-100 disabled:cursor-not-allowed disabled:opacity-50"
         >
           Next
         </button>

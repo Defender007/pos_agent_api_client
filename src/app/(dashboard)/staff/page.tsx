@@ -5,6 +5,7 @@ import SectionErrorCard, {
 import {
   ClearFiltersButton,
   FilterSelect,
+  ListToolbar,
   PageSizeSelect,
   PaginationControls,
   SearchInput,
@@ -59,10 +60,11 @@ export default async function StaffPage({ searchParams }: Props) {
         <SectionErrorCard {...loadError} />
       ) : staffUsers ? (
       <div className="overflow-hidden rounded-2xl border bg-white shadow-sm">
-        <div className="grid gap-3 border-b border-slate-200 p-4 lg:grid-cols-[minmax(220px,1fr)_auto_auto]">
+        <div className="border-b border-slate-200 p-4">
+        <ListToolbar>
           <SearchInput placeholder="Search merchant staff" />
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap items-end gap-3">
             <FilterSelect
               label="Role"
               paramName="role"
@@ -81,10 +83,15 @@ export default async function StaffPage({ searchParams }: Props) {
                 { label: "Suspended", value: "suspended" },
               ]}
             />
-            <SearchInput placeholder="Organisation" paramName="organisation" />
+            <SearchInput
+              label="Organisation"
+              placeholder="All organisations"
+              paramName="organisation"
+              widthClass="sm:w-[220px]"
+            />
           </div>
 
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap items-end gap-3">
             <SortControls options={staffSortOptions} />
             <PageSizeSelect />
             <ClearFiltersButton
@@ -98,6 +105,7 @@ export default async function StaffPage({ searchParams }: Props) {
               ]}
             />
           </div>
+        </ListToolbar>
         </div>
 
         {staffUsers.items.length === 0 ? (

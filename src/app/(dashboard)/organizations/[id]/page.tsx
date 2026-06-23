@@ -8,6 +8,7 @@ import SectionErrorCard, {
 import {
   ClearFiltersButton,
   FilterSelect,
+  ListToolbar,
   PageSizeSelect,
   PaginationControls,
   SearchInput,
@@ -236,17 +237,18 @@ export default async function OrganizationDetailPage({
 
         {staff ? (
           <>
-        <div className="grid gap-3 border-y border-slate-200 py-4 lg:grid-cols-[minmax(220px,1fr)_auto_auto]">
+        <ListToolbar className="mt-4">
           <SearchInput
             placeholder="Search staff"
             paramName="staff_search"
             pageParam="staff_page"
           />
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap items-end gap-3">
             <FilterSelect
               label="Role"
               paramName="staff_role"
               pageParam="staff_page"
+              widthClass="sm:w-[170px]"
               options={[
                 { label: "All roles", value: "" },
                 { label: "Admin", value: "admin" },
@@ -256,6 +258,7 @@ export default async function OrganizationDetailPage({
               label="Status"
               paramName="staff_status"
               pageParam="staff_page"
+              widthClass="sm:w-[170px]"
               options={[
                 { label: "All statuses", value: "" },
                 { label: "Active", value: "active" },
@@ -264,7 +267,7 @@ export default async function OrganizationDetailPage({
               ]}
             />
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap items-end gap-3">
             <SortControls
               options={staffSortOptions}
               sortByParam="staff_sort_by"
@@ -283,7 +286,7 @@ export default async function OrganizationDetailPage({
               ]}
             />
           </div>
-        </div>
+        </ListToolbar>
 
         {staff.items.length === 0 ? (
           <div className="mt-4">
@@ -370,17 +373,18 @@ export default async function OrganizationDetailPage({
 
         {agents ? (
           <>
-        <div className="grid gap-3 border-y border-slate-200 py-4 lg:grid-cols-[minmax(220px,1fr)_auto_auto]">
+        <ListToolbar className="mt-4">
           <SearchInput
             placeholder="Search agents"
             paramName="agents_search"
             pageParam="agents_page"
           />
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap items-end gap-3">
             <FilterSelect
               label="Status"
               paramName="agents_status"
               pageParam="agents_page"
+              widthClass="sm:w-[170px]"
               options={[
                 { label: "All statuses", value: "" },
                 { label: "Pending", value: "pending" },
@@ -394,6 +398,7 @@ export default async function OrganizationDetailPage({
               label="Agent type"
               paramName="agents_agent_type"
               pageParam="agents_page"
+              widthClass="sm:w-[170px]"
               options={[
                 { label: "All types", value: "" },
                 { label: "Standard", value: "standard" },
@@ -405,11 +410,13 @@ export default async function OrganizationDetailPage({
               paramName="agents_business_segment"
               pageParam="agents_page"
               options={businessSegmentOptions}
+              widthClass="sm:w-[190px]"
             />
             <FilterSelect
               label="Has TID"
               paramName="agents_has_tid"
               pageParam="agents_page"
+              widthClass="sm:w-[170px]"
               options={[
                 { label: "Any", value: "" },
                 { label: "With TID", value: "true" },
@@ -417,7 +424,7 @@ export default async function OrganizationDetailPage({
               ]}
             />
           </div>
-          <div className="flex flex-wrap gap-3">
+          <div className="flex flex-wrap items-end gap-3">
             <SortControls
               options={organizationAgentSortOptions}
               sortByParam="agents_sort_by"
@@ -441,7 +448,7 @@ export default async function OrganizationDetailPage({
               ]}
             />
           </div>
-        </div>
+        </ListToolbar>
 
         {agents.items.length === 0 ? (
           <div className="mt-4">
