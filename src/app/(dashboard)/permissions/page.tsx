@@ -8,16 +8,39 @@ import {
 import SectionErrorCard, {
   type SectionErrorCardProps,
 } from "@/components/common/section-error-card";
+import {
+  ClearFiltersButton,
+  EmptyState,
+  PageSizeSelect,
+  PaginationControls,
+  SearchInput,
+  SortControls,
+} from "@/components/list/list-controls";
 import PageContainer from "@/components/layout/page-container";
 import PageTitle from "@/components/layout/page-title";
+import type { PaginatedData } from "@/lib/api/pagination";
+import { getListQuery, type PageSearchParams } from "@/lib/list-query";
 import { getServerPageError } from "@/lib/api/server-page-error";
 
-export default async function PermissionsPage() {
-  let permissions: BankadminPermission[] = [];
+type Props = {
+  searchParams: Promise<PageSearchParams>;
+};
+
+const permissionSortOptions = [
+  { label: "Newest", value: "created_at" },
+  { label: "Name", value: "name" },
+];
+
+export default async function PermissionsPage({ searchParams }: Props) {
+  const query = getListQuery(await searchParams, {
+    defaultSortBy: "created_at",
+  });
+
+  let permissions: PaginatedData<BankadminPermission> | null = null;
   let loadError: SectionErrorCardProps | null = null;
 
   try {
-    permissions = await getBankadminPermissions();
+    permissions = await getBankadminPermissions(query);
   } catch (error) {
     loadError = getServerPageError(error, {
       sessionExpiredRedirect: "/backoffice/login?session=expired",
@@ -39,9 +62,25 @@ export default async function PermissionsPage() {
 
       {loadError ? (
         <SectionErrorCard {...loadError} />
-      ) : (
+      ) : permissions ? (
+      <div className="rounded-2xl border bg-white shadow-sm">
+        <div className="grid gap-3 border-b border-slate-200 p-4 lg:grid-cols-[minmax(220px,1fr)_auto]">
+          <SearchInput placeholder="Search permissions" />
+          <div className="flex flex-wrap gap-3">
+            <SortControls options={permissionSortOptions} />
+            <PageSizeSelect />
+            <ClearFiltersButton params={["search", "sort_by", "sort_order"]} />
+          </div>
+        </div>
+
+        {permissions.items.length === 0 ? (
+          <div className="p-4">
+            <EmptyState message="No permissions found." />
+          </div>
+        ) : (
+      <div className="p-4">
       <div className="grid gap-6 md:grid-cols-2 xl:grid-cols-3">
-        {permissions.map((permission) => (
+        {permissions.items.map((permission) => (
           <div
             key={permission.id}
             className="rounded-2xl border bg-white p-6 shadow-sm transition hover:-translate-y-1 hover:shadow-lg"
@@ -56,7 +95,11 @@ export default async function PermissionsPage() {
           </div>
         ))}
       </div>
-      )}
+      </div>
+        )}
+        <PaginationControls data={permissions} />
+      </div>
+      ) : null}
     </PageContainer>
   );
 }

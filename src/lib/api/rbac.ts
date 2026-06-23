@@ -1,6 +1,12 @@
 import { cookies } from "next/headers";
 import { getServerApiBaseUrl } from "@/lib/api/api-config";
 import { parseApiError } from "@/lib/api/api-error";
+import {
+  normalizePaginatedData,
+  type ListQuery,
+  type PaginatedData,
+  withListQuery,
+} from "@/lib/api/pagination";
 
 const API_BASE_URL = getServerApiBaseUrl();
 
@@ -64,8 +70,10 @@ export async function getCurrentAdminProfile(): Promise<CurrentAdminProfile> {
   return result.data;
 }
 
-export async function getStaffUsers(): Promise<AdminUser[]> {
-  const response = await fetch(`${API_BASE_URL}/rbac/staff`, {
+export async function getStaffUsers(
+  query: ListQuery = {},
+): Promise<PaginatedData<AdminUser>> {
+  const response = await fetch(withListQuery(`${API_BASE_URL}/rbac/staff`, query), {
     cache: "no-store",
     headers: await getAuthHeaders(),
   });
@@ -75,7 +83,7 @@ export async function getStaffUsers(): Promise<AdminUser[]> {
   }
 
   const result = await response.json();
-  return result.data;
+  return normalizePaginatedData(result.data, query);
 }
 
 export async function createRole(payload: {
@@ -96,8 +104,10 @@ export async function createRole(payload: {
   return result.data;
 }
 
-export async function getRoles(): Promise<Role[]> {
-  const response = await fetch(`${API_BASE_URL}/rbac/roles`, {
+export async function getRoles(
+  query: ListQuery = {},
+): Promise<PaginatedData<Role>> {
+  const response = await fetch(withListQuery(`${API_BASE_URL}/rbac/roles`, query), {
     cache: "no-store",
     headers: await getAuthHeaders(),
   });
@@ -107,21 +117,26 @@ export async function getRoles(): Promise<Role[]> {
   }
 
   const result = await response.json();
-  return result.data;
+  return normalizePaginatedData(result.data, query);
 }
 
-export async function getPermissions(): Promise<Permission[]> {
-  const response = await fetch(`${API_BASE_URL}/rbac/permissions`, {
+export async function getPermissions(
+  query: ListQuery = {},
+): Promise<PaginatedData<Permission>> {
+  const response = await fetch(
+    withListQuery(`${API_BASE_URL}/rbac/permissions`, query),
+    {
     cache: "no-store",
     headers: await getAuthHeaders(),
-  });
+    },
+  );
 
   if (!response.ok) {
     throw await parseApiError(response);
   }
 
   const result = await response.json();
-  return result.data;
+  return normalizePaginatedData(result.data, query);
 }
 
 export async function createPermission(payload: {

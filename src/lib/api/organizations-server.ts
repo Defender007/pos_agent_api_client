@@ -2,6 +2,12 @@ import { cookies } from "next/headers";
 
 import { getServerApiBaseUrl } from "@/lib/api/api-config";
 import { parseApiError } from "@/lib/api/api-error";
+import {
+  normalizePaginatedData,
+  type ListQuery,
+  type PaginatedData,
+  withListQuery,
+} from "@/lib/api/pagination";
 import type { Organization } from "@/lib/api/organizations";
 
 const API_BASE_URL = getServerApiBaseUrl();
@@ -51,11 +57,16 @@ async function getBankAuthHeaders() {
   };
 }
 
-export async function getOrganizations(): Promise<Organization[]> {
-  const response = await fetch(`${API_BASE_URL}/organizations`, {
-    cache: "no-store",
-    headers: await getBankAuthHeaders(),
-  });
+export async function getOrganizations(
+  query: ListQuery = {},
+): Promise<PaginatedData<Organization>> {
+  const response = await fetch(
+    withListQuery(`${API_BASE_URL}/organizations`, query),
+    {
+      cache: "no-store",
+      headers: await getBankAuthHeaders(),
+    },
+  );
 
   if (!response.ok) {
     throw await parseApiError(response);
@@ -63,7 +74,7 @@ export async function getOrganizations(): Promise<Organization[]> {
 
   const result = await response.json();
 
-  return result.data;
+  return normalizePaginatedData(result.data, query);
 }
 
 export async function getOrganization(
@@ -88,9 +99,13 @@ export async function getOrganization(
 
 export async function getOrganizationStaff(
   organizationId: string,
-): Promise<OrganizationStaffMember[]> {
+  query: ListQuery = {},
+): Promise<PaginatedData<OrganizationStaffMember>> {
   const response = await fetch(
-    `${API_BASE_URL}/organizations/${organizationId}/staff`,
+    withListQuery(
+      `${API_BASE_URL}/organizations/${organizationId}/staff`,
+      query,
+    ),
     {
       cache: "no-store",
       headers: await getBankAuthHeaders(),
@@ -103,14 +118,18 @@ export async function getOrganizationStaff(
 
   const result = await response.json();
 
-  return result.data;
+  return normalizePaginatedData(result.data, query);
 }
 
 export async function getOrganizationAgents(
   organizationId: string,
-): Promise<OrganizationAgent[]> {
+  query: ListQuery = {},
+): Promise<PaginatedData<OrganizationAgent>> {
   const response = await fetch(
-    `${API_BASE_URL}/organizations/${organizationId}/agents`,
+    withListQuery(
+      `${API_BASE_URL}/organizations/${organizationId}/agents`,
+      query,
+    ),
     {
       cache: "no-store",
       headers: await getBankAuthHeaders(),
@@ -123,7 +142,7 @@ export async function getOrganizationAgents(
 
   const result = await response.json();
 
-  return result.data;
+  return normalizePaginatedData(result.data, query);
 }
 
 export async function getOrganizationStaffMember(

@@ -44,10 +44,25 @@ function agentStatusClass(status: Agent["status"]) {
 
 export default async function DashboardPage() {
   let agents: Agent[] = [];
+  let totalAgents = 0;
+  let activeAgents = 0;
+  let pendingAgents = 0;
+  let suspendedAgents = 0;
   let loadError: SectionErrorCardProps | null = null;
 
   try {
-    agents = await getAgents();
+    const [recent, active, pending, suspended] = await Promise.all([
+      getAgents({ page: 1, page_size: 5, sort_by: "created_at", sort_order: "desc" }),
+      getAgents({ page: 1, page_size: 1, status: "active" }),
+      getAgents({ page: 1, page_size: 1, status: "pending" }),
+      getAgents({ page: 1, page_size: 1, status: "suspended" }),
+    ]);
+
+    agents = recent.items;
+    totalAgents = recent.pagination.total_items;
+    activeAgents = active.pagination.total_items;
+    pendingAgents = pending.pagination.total_items;
+    suspendedAgents = suspended.pagination.total_items;
   } catch (error) {
     if (error instanceof Error && error.message === "SESSION_EXPIRED") {
       redirect("/login?session=expired");
@@ -57,11 +72,7 @@ export default async function DashboardPage() {
     });
   }
 
-  const totalAgents = agents.length;
-  const activeAgents = agents.filter((a) => a.status === "active").length;
-  const pendingAgents = agents.filter((a) => a.status === "pending").length;
-  const suspendedAgents = agents.filter((a) => a.status === "suspended").length;
-  const recentAgents = agents.slice(0, 5);
+  const recentAgents = agents;
 
   return (
     <PageContainer>

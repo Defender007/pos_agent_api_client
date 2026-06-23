@@ -2,6 +2,12 @@ import { cookies } from "next/headers";
 
 import { getServerApiBaseUrl } from "@/lib/api/api-config";
 import { parseApiError } from "@/lib/api/api-error";
+import {
+  normalizePaginatedData,
+  type ListQuery,
+  type PaginatedData,
+  withListQuery,
+} from "@/lib/api/pagination";
 
 const API_BASE_URL = getServerApiBaseUrl();
 
@@ -49,11 +55,16 @@ export type BankadminPermission = {
   description?: string | null;
 };
 
-export async function getBankadminStaff(): Promise<BankadminStaff[]> {
-  const response = await fetch(`${API_BASE_URL}/bankadmin/staff`, {
-    cache: "no-store",
-    headers: await getBankAuthHeaders(),
-  });
+export async function getBankadminStaff(
+  query: ListQuery = {},
+): Promise<PaginatedData<BankadminStaff>> {
+  const response = await fetch(
+    withListQuery(`${API_BASE_URL}/bankadmin/staff`, query),
+    {
+      cache: "no-store",
+      headers: await getBankAuthHeaders(),
+    },
+  );
 
   if (!response.ok) {
     throw await parseApiError(response);
@@ -61,14 +72,19 @@ export async function getBankadminStaff(): Promise<BankadminStaff[]> {
 
   const result = await response.json();
 
-  return result.data;
+  return normalizePaginatedData(result.data, query);
 }
 
-export async function getBankadminRoles(): Promise<BankadminRole[]> {
-  const response = await fetch(`${API_BASE_URL}/bankadmin/roles`, {
-    cache: "no-store",
-    headers: await getBankAuthHeaders(),
-  });
+export async function getBankadminRoles(
+  query: ListQuery = {},
+): Promise<PaginatedData<BankadminRole>> {
+  const response = await fetch(
+    withListQuery(`${API_BASE_URL}/bankadmin/roles`, query),
+    {
+      cache: "no-store",
+      headers: await getBankAuthHeaders(),
+    },
+  );
 
   if (!response.ok) {
     throw await parseApiError(response);
@@ -76,16 +92,19 @@ export async function getBankadminRoles(): Promise<BankadminRole[]> {
 
   const result = await response.json();
 
-  return result.data;
+  return normalizePaginatedData(result.data, query);
 }
 
-export async function getBankadminPermissions(): Promise<
-  BankadminPermission[]
-> {
-  const response = await fetch(`${API_BASE_URL}/bankadmin/permissions`, {
-    cache: "no-store",
-    headers: await getBankAuthHeaders(),
-  });
+export async function getBankadminPermissions(
+  query: ListQuery = {},
+): Promise<PaginatedData<BankadminPermission>> {
+  const response = await fetch(
+    withListQuery(`${API_BASE_URL}/bankadmin/permissions`, query),
+    {
+      cache: "no-store",
+      headers: await getBankAuthHeaders(),
+    },
+  );
 
   if (!response.ok) {
     throw await parseApiError(response);
@@ -93,5 +112,5 @@ export async function getBankadminPermissions(): Promise<
 
   const result = await response.json();
 
-  return result.data;
+  return normalizePaginatedData(result.data, query);
 }

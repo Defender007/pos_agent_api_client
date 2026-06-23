@@ -1,24 +1,18 @@
 import StatusBadge from "@/components/ui/custom/status-badge";
 import { Agent } from "@/types/agent";
 import Link from "next/link";
-import SectionCard from "@/components/ui/custom/section-card";
 import DataTable from "@/components/ui/custom/data-table";
+import { EmptyState } from "@/components/list/list-controls";
 
 type AgentsTableProps = {
   agents: Agent[];
 };
 export default function AgentsTable({ agents }: AgentsTableProps) {
   if (agents.length === 0) {
-    return (
-      <SectionCard>
-        <div className="py-10 text-center">
-          <p className="text-gray-500">No agents found.</p>
-        </div>
-      </SectionCard>
-    );
+    return <EmptyState message="No agents found." />;
   }
   return (
-    <SectionCard>
+    <div className="overflow-x-auto">
       <DataTable
         headers={[
           "Agent Code",
@@ -69,6 +63,6 @@ export default function AgentsTable({ agents }: AgentsTableProps) {
           </tr>
         ))}
       </DataTable>
-    </SectionCard>
+    </div>
   );
 }

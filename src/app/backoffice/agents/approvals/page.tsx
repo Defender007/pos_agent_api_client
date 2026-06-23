@@ -4,11 +4,22 @@ import Link from "next/link";
 import SectionErrorCard, {
   type SectionErrorCardProps,
 } from "@/components/common/section-error-card";
+import {
+  ClearFiltersButton,
+  FilterSelect,
+  PageSizeSelect,
+  PaginationControls,
+  SearchInput,
+  SortControls,
+  EmptyState,
+} from "@/components/list/list-controls";
 import PageContainer from "@/components/layout/page-container";
 import PageTitle from "@/components/layout/page-title";
 import Sidebar from "@/components/layout/sidebar";
 import TopHeader from "@/components/layout/top-header";
 import { getBankAdminAgents } from "@/lib/api/bank-agents-server";
+import type { PaginatedData } from "@/lib/api/pagination";
+import { getListQuery, type PageSearchParams } from "@/lib/list-query";
 import { getServerPageError } from "@/lib/api/server-page-error";
 import type { BankAgent } from "@/types/bank-agent";
 
@@ -80,18 +91,10 @@ function AgentTypeBadge({ agentType }: { agentType?: string | null }) {
   );
 }
 
-function AgentsTableSection({
-  title,
-  description,
+function AgentsTable({
   agents,
-  emptyMessage,
-  statusTone,
 }: {
-  title: string;
-  description: string;
   agents: BankAgent[];
-  emptyMessage: string;
-  statusTone: AgentStatusGroup;
 }) {
   const headers = [
     "Agent Code",
@@ -104,16 +107,10 @@ function AgentsTableSection({
   ];
 
   return (
-    <div className="mt-8 min-w-0 rounded-2xl border bg-white p-4 shadow-sm sm:p-6">
-      <div className="mb-5">
-        <h2 className="text-xl font-bold text-slate-900">{title}</h2>
-
-        <p className="text-sm text-slate-500">{description}</p>
-      </div>
-
+    <>
       {agents.length === 0 ? (
-        <div className="rounded-xl border border-dashed px-6 py-10 text-center">
-          <p className="text-sm text-slate-500">{emptyMessage}</p>
+        <div className="p-4">
+          <EmptyState message="No agents match the current filters." />
         </div>
       ) : (
         <div className="max-w-full overflow-x-auto rounded-xl border">
@@ -132,8 +129,11 @@ function AgentsTableSection({
             </thead>
 
             <tbody className="divide-y divide-slate-200">
-              {agents.map((agent) => (
-                <tr key={agent.id} className="hover:bg-slate-50">
+              {agents.map((agent) => {
+                const statusTone = getStatusGroup(agent.status) || "pending";
+
+                return (
+                  <tr key={agent.id} className="hover:bg-slate-50">
                   <td className="px-6 py-4 text-sm font-semibold text-slate-900">
                     {agent.agent_code || "—"}
                   </td>
@@ -168,42 +168,60 @@ function AgentsTableSection({
                       {statusTone === "pending" ? "Review" : "View Details"}
                     </Link>
                   </td>
-                </tr>
-              ))}
+                  </tr>
+                );
+              })}
             </tbody>
           </table>
         </div>
       )}
-    </div>
+    </>
   );
 }
 
-export default async function AgentApprovalsPage() {
-  let agents: BankAgent[] = [];
-  let pendingAgents: BankAgent[] = [];
-  let activeAgents: BankAgent[] = [];
-  let suspendedAgents: BankAgent[] = [];
-  let rejectedAgents: BankAgent[] = [];
-  let deactivatedAgents: BankAgent[] = [];
+type Props = {
+  searchParams: Promise<PageSearchParams>;
+};
+
+const bankAgentSortOptions = [
+  { label: "Newest", value: "created_at" },
+  { label: "Agent Code", value: "agent_code" },
+  { label: "Business Name", value: "business_name" },
+  { label: "Status", value: "status" },
+];
+
+const businessSegmentOptions = [
+  { label: "All industries", value: "" },
+  { label: "Fast Foods", value: "fast_foods" },
+  { label: "Hotels/GuestHouses", value: "hotels_guesthouses" },
+  { label: "Fuel Stations", value: "fuel_stations" },
+  { label: "Airlines Operations", value: "airlines_operations" },
+  { label: "Restaurants", value: "restaurants" },
+  { label: "Logistics/Courier", value: "logistics_courier" },
+  { label: "Wholesale", value: "wholesale" },
+  { label: "Church/NGO", value: "church_ngo" },
+  { label: "Stores/Supermarkets", value: "stores_supermarkets" },
+  { label: "MDAs", value: "mdas" },
+  { label: "Others", value: "others" },
+];
+
+export default async function AgentApprovalsPage({ searchParams }: Props) {
+  const query = getListQuery(await searchParams, {
+    defaultSortBy: "created_at",
+    allowedFilters: [
+      "status",
+      "agent_type",
+      "organization_id",
+      "business_segment",
+      "has_tid",
+    ],
+  });
+
+  let agents: PaginatedData<BankAgent> | null = null;
   let loadError: SectionErrorCardProps | null = null;
 
   try {
-    agents = await getBankAdminAgents();
-    pendingAgents = agents.filter(
-      (agent) => getStatusGroup(agent.status) === "pending",
-    );
-    activeAgents = agents.filter(
-      (agent) => getStatusGroup(agent.status) === "active",
-    );
-    suspendedAgents = agents.filter(
-      (agent) => getStatusGroup(agent.status) === "suspended",
-    );
-    rejectedAgents = agents.filter(
-      (agent) => getStatusGroup(agent.status) === "rejected",
-    );
-    deactivatedAgents = agents.filter(
-      (agent) => getStatusGroup(agent.status) === "deactivated",
-    );
+    agents = await getBankAdminAgents(query);
   } catch (error) {
     if (error instanceof Error && error.message === "SESSION_EXPIRED") {
       redirect("/backoffice/login?session=expired");
@@ -239,49 +257,75 @@ export default async function AgentApprovalsPage() {
 
             {loadError ? (
               <SectionErrorCard {...loadError} />
-            ) : (
-              <>
-                <AgentsTableSection
-                  title="Pending Approval Agents"
-                  description="Agents awaiting backoffice review"
-                  agents={pendingAgents}
-                  emptyMessage="No agents are currently pending approval."
-                  statusTone="pending"
-                />
+            ) : agents ? (
+              <div className="mt-8 min-w-0 overflow-hidden rounded-2xl border bg-white shadow-sm">
+                <div className="grid gap-3 border-b border-slate-200 p-4 lg:grid-cols-[minmax(220px,1fr)_auto_auto]">
+                  <SearchInput placeholder="Search agents" />
 
-                <AgentsTableSection
-                  title="Active Agents"
-                  description="Approved agents currently active"
-                  agents={activeAgents}
-                  emptyMessage="No active agents found."
-                  statusTone="active"
-                />
+                  <div className="flex flex-wrap gap-3">
+                    <FilterSelect
+                      label="Status"
+                      paramName="status"
+                      options={[
+                        { label: "All", value: "" },
+                        { label: "Pending", value: "pending" },
+                        { label: "Active", value: "active" },
+                        { label: "Suspended", value: "suspended" },
+                        { label: "Rejected", value: "rejected" },
+                        { label: "Deactivated", value: "deactivated" },
+                      ]}
+                    />
+                    <FilterSelect
+                      label="Agent type"
+                      paramName="agent_type"
+                      options={[
+                        { label: "All types", value: "" },
+                        { label: "Standard", value: "standard" },
+                        { label: "Solopreneur", value: "solopreneur" },
+                      ]}
+                    />
+                    <FilterSelect
+                      label="Industry"
+                      paramName="business_segment"
+                      options={businessSegmentOptions}
+                    />
+                    <SearchInput
+                      placeholder="Organization ID"
+                      paramName="organization_id"
+                    />
+                    <FilterSelect
+                      label="Has TID"
+                      paramName="has_tid"
+                      options={[
+                        { label: "Any", value: "" },
+                        { label: "With TID", value: "true" },
+                        { label: "Without TID", value: "false" },
+                      ]}
+                    />
+                  </div>
 
-                <AgentsTableSection
-                  title="Suspended Agents"
-                  description="Agents suspended by bank review"
-                  agents={suspendedAgents}
-                  emptyMessage="No suspended agents found."
-                  statusTone="suspended"
-                />
+                  <div className="flex flex-wrap gap-3">
+                    <SortControls options={bankAgentSortOptions} />
+                    <PageSizeSelect />
+                    <ClearFiltersButton
+                      params={[
+                        "search",
+                        "status",
+                        "agent_type",
+                        "organization_id",
+                        "business_segment",
+                        "has_tid",
+                        "sort_by",
+                        "sort_order",
+                      ]}
+                    />
+                  </div>
+                </div>
 
-                <AgentsTableSection
-                  title="Rejected Agents"
-                  description="Agents rejected by backoffice"
-                  agents={rejectedAgents}
-                  emptyMessage="No rejected agents found."
-                  statusTone="rejected"
-                />
-
-                <AgentsTableSection
-                  title="Deactivated Agents"
-                  description="Agents deactivated by bank review"
-                  agents={deactivatedAgents}
-                  emptyMessage="No deactivated agents found."
-                  statusTone="deactivated"
-                />
-              </>
-            )}
+                <AgentsTable agents={agents.items} />
+                <PaginationControls data={agents} />
+              </div>
+            ) : null}
           </PageContainer>
         </div>
       </main>
