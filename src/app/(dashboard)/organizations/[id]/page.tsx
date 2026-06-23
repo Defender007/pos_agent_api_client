@@ -2,6 +2,10 @@ import PageContainer from "@/components/layout/page-container";
 import PageTitle from "@/components/layout/page-title";
 import Link from "next/link";
 
+import {
+  AgentStatusBadge,
+  AgentTypeBadge,
+} from "@/components/agents/agent-badges";
 import SectionErrorCard, {
   type SectionErrorCardProps,
 } from "@/components/common/section-error-card";
@@ -34,33 +38,6 @@ type Props = {
   }>;
   searchParams: Promise<PageSearchParams>;
 };
-
-function statusPillClass(status?: string | null) {
-  const normalizedStatus = status?.toLowerCase();
-
-  if (normalizedStatus === "active" || normalizedStatus === "approved") {
-    return "bg-[#E6F4EC] text-[#005C2E]";
-  }
-
-  if (
-    normalizedStatus === "pending" ||
-    normalizedStatus === "pending_approval"
-  ) {
-    return "bg-[#FFF7D6] text-[#7A5A00]";
-  }
-
-  if (normalizedStatus === "rejected" || normalizedStatus === "suspended") {
-    return "bg-red-100 text-red-700";
-  }
-
-  return "bg-slate-100 text-slate-700";
-}
-
-function agentTypePillClass(agentType?: string | null) {
-  return agentType === "solopreneur"
-    ? "bg-[#FFF7D6] text-[#005C2E]"
-    : "bg-slate-100 text-slate-700";
-}
 
 const staffSortOptions = [
   { label: "Newest", value: "created_at" },
@@ -455,8 +432,8 @@ export default async function OrganizationDetailPage({
             <EmptyState message="No agents have been created under this organization yet." />
           </div>
         ) : (
-          <div className="mt-4 overflow-x-auto rounded-xl border">
-            <table className="w-full min-w-[1100px]">
+          <div className="mt-4 w-full overflow-x-auto rounded-xl border">
+            <table className="w-full min-w-[1100px] table-auto">
               <thead className="bg-slate-50">
                 <tr>
                   {[
@@ -471,7 +448,19 @@ export default async function OrganizationDetailPage({
                   ].map((h) => (
                     <th
                       key={h}
-                      className="px-6 py-4 text-left text-sm font-semibold text-slate-600"
+                      className={`px-6 py-4 text-left text-sm font-semibold text-slate-600 align-middle ${
+                        [
+                          "Agent Code",
+                          "Phone",
+                          "Agent Type",
+                          "TID",
+                          "Status",
+                        ].includes(h)
+                          ? "whitespace-nowrap"
+                          : h === "Email"
+                            ? "min-w-[220px]"
+                            : "min-w-[150px]"
+                      }`}
                     >
                       {h}
                     </th>
@@ -486,46 +475,36 @@ export default async function OrganizationDetailPage({
 
                   return (
                     <tr key={agent.id} className="hover:bg-slate-50">
-                      <td className="px-6 py-4 text-sm font-semibold text-slate-900">
+                      <td className="whitespace-nowrap px-6 py-4 text-sm font-semibold text-slate-900 align-middle">
                         {agent.agent_code || "—"}
                       </td>
 
-                      <td className="px-6 py-4 text-sm text-slate-700">
+                      <td className="min-w-[150px] px-6 py-4 text-sm text-slate-700 align-middle">
                         {fullName}
                       </td>
 
-                      <td className="px-6 py-4 text-sm text-slate-700">
+                      <td className="min-w-[150px] px-6 py-4 text-sm text-slate-700 align-middle">
                         {agent.business_name || "—"}
                       </td>
 
-                      <td className="px-6 py-4 text-sm text-slate-700">
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-700 align-middle">
                         {agent.phone || "—"}
                       </td>
 
-                      <td className="px-6 py-4 text-sm text-slate-700">
+                      <td className="min-w-[220px] px-6 py-4 text-sm text-slate-700 align-middle">
                         {agent.email || "—"}
                       </td>
 
-                      <td className="px-6 py-4 text-sm">
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-semibold ${agentTypePillClass(agent.agent_type)}`}
-                        >
-                          {agent.agent_type === "solopreneur"
-                            ? "Solopreneur Agent"
-                            : "Standard Agent"}
-                        </span>
+                      <td className="whitespace-nowrap px-6 py-4 text-sm align-middle">
+                        <AgentTypeBadge agentType={agent.agent_type} />
                       </td>
 
-                      <td className="px-6 py-4 text-sm text-slate-700">
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-700 align-middle">
                         {agent.tid || "—"}
                       </td>
 
-                      <td className="px-6 py-4 text-sm">
-                        <span
-                          className={`rounded-full px-3 py-1 text-xs font-semibold ${statusPillClass(agent.status)}`}
-                        >
-                          {agent.status || "—"}
-                        </span>
+                      <td className="whitespace-nowrap px-6 py-4 text-sm align-middle">
+                        <AgentStatusBadge status={agent.status} />
                       </td>
                     </tr>
                   );

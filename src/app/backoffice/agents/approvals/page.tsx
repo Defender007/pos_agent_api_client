@@ -5,6 +5,10 @@ import SectionErrorCard, {
   type SectionErrorCardProps,
 } from "@/components/common/section-error-card";
 import {
+  AgentStatusBadge,
+  AgentTypeBadge,
+} from "@/components/agents/agent-badges";
+import {
   ClearFiltersButton,
   FilterSelect,
   ListToolbar,
@@ -52,46 +56,6 @@ function getStatusGroup(status?: string | null): AgentStatusGroup | null {
   return (match?.[0] as AgentStatusGroup | undefined) || null;
 }
 
-function formatAgentStatus(status?: string | null) {
-  const group = getStatusGroup(status);
-
-  if (group === "pending") return "Pending Approval";
-  if (group === "active") return "Active";
-  if (group === "suspended") return "Suspended";
-  if (group === "rejected") return "Rejected";
-  if (group === "deactivated") return "Deactivated";
-
-  return status ? status.replaceAll("_", " ") : "—";
-}
-
-function statusPillClass(statusTone: AgentStatusGroup) {
-  const styles: Record<AgentStatusGroup, string> = {
-    pending: "bg-[#FFF7D6] text-[#7A5A00]",
-    active: "bg-[#E6F4EC] text-[#005C2E]",
-    suspended: "bg-[#FFF7D6] text-[#7A5A00]",
-    rejected: "bg-red-100 text-red-700",
-    deactivated: "bg-slate-100 text-slate-700",
-  };
-
-  return `rounded-full px-3 py-1 text-xs font-semibold ${styles[statusTone]}`;
-}
-
-function AgentTypeBadge({ agentType }: { agentType?: string | null }) {
-  const isSolopreneur = agentType === "solopreneur";
-
-  return (
-    <span
-      className={`rounded-full px-3 py-1 text-xs font-semibold ${
-        isSolopreneur
-          ? "bg-[#FFF7D6] text-[#005C2E]"
-          : "bg-slate-100 text-slate-700"
-      }`}
-    >
-      {isSolopreneur ? "Solopreneur Agent" : "Standard Agent"}
-    </span>
-  );
-}
-
 function AgentsTable({
   agents,
 }: {
@@ -114,14 +78,22 @@ function AgentsTable({
           <EmptyState message="No agents match the current filters." />
         </div>
       ) : (
-        <div className="max-w-full overflow-x-auto rounded-xl border">
-          <table className="w-full min-w-[900px]">
+        <div className="w-full overflow-x-auto rounded-xl border">
+          <table className="w-full min-w-[900px] table-auto">
             <thead className="bg-slate-50">
               <tr>
                 {headers.map((header) => (
                   <th
                     key={header}
-                    className="px-6 py-4 text-left text-sm font-semibold text-slate-600"
+                    className={`px-6 py-4 text-sm font-semibold text-slate-600 align-middle ${
+                      header === "Actions"
+                        ? "whitespace-nowrap text-right"
+                        : "text-left"
+                    } ${
+                      ["Agent Code", "Agent Type", "Status", "TID"].includes(header)
+                        ? "whitespace-nowrap"
+                        : "min-w-[150px]"
+                    }`}
                   >
                     {header}
                   </th>
@@ -135,33 +107,31 @@ function AgentsTable({
 
                 return (
                   <tr key={agent.id} className="hover:bg-slate-50">
-                  <td className="px-6 py-4 text-sm font-semibold text-slate-900">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm font-semibold text-slate-900 align-middle">
                     {agent.agent_code || "—"}
                   </td>
 
-                  <td className="px-6 py-4 text-sm text-slate-700">
+                  <td className="min-w-[150px] px-6 py-4 text-sm text-slate-700 align-middle">
                     {getAgentName(agent)}
                   </td>
 
-                  <td className="px-6 py-4 text-sm text-slate-700">
+                  <td className="min-w-[150px] px-6 py-4 text-sm text-slate-700 align-middle">
                     {agent.business_name || "—"}
                   </td>
 
-                  <td className="px-6 py-4 text-sm">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm align-middle">
                     <AgentTypeBadge agentType={agent.agent_type} />
                   </td>
 
-                  <td className="px-6 py-4 text-sm">
-                    <span className={statusPillClass(statusTone)}>
-                      {formatAgentStatus(agent.status)}
-                    </span>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm align-middle">
+                    <AgentStatusBadge status={agent.status} />
                   </td>
 
-                  <td className="px-6 py-4 text-sm text-slate-700">
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-700 align-middle">
                     {agent.tid || "—"}
                   </td>
 
-                  <td className="px-6 py-4 text-sm">
+                  <td className="whitespace-nowrap px-6 py-4 text-right text-sm align-middle">
                     <Link
                       href={`/backoffice/agents/approvals/${agent.id}`}
                       className="inline-flex rounded-lg border border-[#BFDCCB] px-3 py-2 font-semibold text-[#005C2E] transition hover:bg-[#E6F4EC]"
