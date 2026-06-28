@@ -26,6 +26,7 @@ import { getBankAdminAgents } from "@/lib/api/bank-agents-server";
 import type { PaginatedData } from "@/lib/api/pagination";
 import { getListQuery, type PageSearchParams } from "@/lib/list-query";
 import { getServerPageError } from "@/lib/api/server-page-error";
+import { displayMerchantId } from "@/lib/merchant-id";
 import type { BankAgent } from "@/types/bank-agent";
 
 type AgentStatusGroup =
@@ -63,6 +64,7 @@ function AgentsTable({
 }) {
   const headers = [
     "Agent Code",
+    "Merchant ID",
     "Name",
     "Business Name",
     "Agent Type",
@@ -90,7 +92,13 @@ function AgentsTable({
                         ? "whitespace-nowrap text-right"
                         : "text-left"
                     } ${
-                      ["Agent Code", "Agent Type", "Status", "TID"].includes(header)
+                      [
+                        "Agent Code",
+                        "Merchant ID",
+                        "Agent Type",
+                        "Status",
+                        "TID",
+                      ].includes(header)
                         ? "whitespace-nowrap"
                         : "min-w-[150px]"
                     }`}
@@ -109,6 +117,10 @@ function AgentsTable({
                   <tr key={agent.id} className="hover:bg-slate-50">
                   <td className="whitespace-nowrap px-6 py-4 text-sm font-semibold text-slate-900 align-middle">
                     {agent.agent_code || "—"}
+                  </td>
+
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-700 align-middle">
+                    {displayMerchantId(agent.merchant_id)}
                   </td>
 
                   <td className="min-w-[150px] px-6 py-4 text-sm text-slate-700 align-middle">

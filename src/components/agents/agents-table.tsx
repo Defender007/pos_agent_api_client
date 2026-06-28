@@ -2,6 +2,7 @@ import StatusBadge from "@/components/ui/custom/status-badge";
 import { Agent } from "@/types/agent";
 import Link from "next/link";
 import { EmptyState } from "@/components/list/list-controls";
+import { displayMerchantId } from "@/lib/merchant-id";
 
 type AgentsTableProps = {
   agents: Agent[];
@@ -17,6 +18,9 @@ export default function AgentsTable({ agents }: AgentsTableProps) {
           <tr className="border-b bg-slate-50 text-left">
             <th className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-slate-600 align-middle">
               Agent Code
+            </th>
+            <th className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-slate-600 align-middle">
+              Merchant ID
             </th>
             <th className="min-w-[150px] px-4 py-3 text-sm font-semibold text-slate-600 align-middle">
               Full Name
@@ -41,6 +45,10 @@ export default function AgentsTable({ agents }: AgentsTableProps) {
           <tr key={agent.id} className="border-b">
             <td className="whitespace-nowrap px-4 py-4 text-sm font-semibold text-slate-900 align-middle">
               {agent.agentCode}
+            </td>
+
+            <td className="whitespace-nowrap px-4 py-4 text-sm text-slate-700 align-middle">
+              {displayMerchantId(agent.merchantId)}
             </td>
 
             <td className="min-w-[150px] px-4 py-4 text-sm text-slate-700 align-middle">

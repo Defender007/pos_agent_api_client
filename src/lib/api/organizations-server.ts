@@ -23,6 +23,7 @@ export type OrganizationAgent = {
   phone: string;
   email: string;
   business_name: string;
+  merchant_id: string | null;
   agent_type?: "standard" | "solopreneur" | null;
   tid?: string | null;
   organization_id: string;

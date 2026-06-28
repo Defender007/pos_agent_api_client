@@ -22,6 +22,7 @@ import type { PaginatedData } from "@/lib/api/pagination";
 import { getListQuery, type PageSearchParams } from "@/lib/list-query";
 import { getServerPageError } from "@/lib/api/server-page-error";
 import { getBusinessSegmentLabel } from "@/lib/business-segments";
+import { displayMerchantId } from "@/lib/merchant-id";
 
 type Props = {
   searchParams: Promise<PageSearchParams>;
@@ -172,6 +173,7 @@ export default async function OrganizationsPage({ searchParams }: Props) {
               {[
                 "Name",
                 "Code",
+                "Merchant ID",
                 "Type",
                 "Business Segment",
                 "Email",
@@ -196,6 +198,10 @@ export default async function OrganizationsPage({ searchParams }: Props) {
                 <td className="px-6 py-4 font-semibold">{org.name}</td>
 
                 <td className="px-6 py-4">{org.code || "—"}</td>
+
+                <td className="whitespace-nowrap px-6 py-4">
+                  {displayMerchantId(org.merchant_id)}
+                </td>
 
                 <td className="px-6 py-4">
                   <span

@@ -6,6 +6,7 @@ import PageContainer from "@/components/layout/page-container";
 import PageTitle from "@/components/layout/page-title";
 import SectionCard from "@/components/ui/custom/section-card";
 import StatusBadge from "@/components/ui/custom/status-badge";
+import { displayMerchantId } from "@/lib/merchant-id";
 import { getServerPageError } from "@/lib/api/server-page-error";
 import type { Agent } from "@/types/agent";
 
@@ -82,6 +83,10 @@ export default async function AgentDetailsPage({
           <div className="grid gap-4 md:grid-cols-2">
             {/*<DetailItem label="Agent ID" value={agent.id} />*/}
             <DetailItem label="Agent Code" value={agent.agentCode} />
+            <DetailItem
+              label="Merchant ID"
+              value={displayMerchantId(agent.merchantId)}
+            />
             <DetailItem label="First Name" value={agent.firstName} />
             <DetailItem label="Last Name" value={agent.lastName} />
             <DetailItem label="Phone" value={agent.phone} />

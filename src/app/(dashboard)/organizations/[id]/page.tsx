@@ -32,6 +32,7 @@ import type { PaginatedData } from "@/lib/api/pagination";
 import { getListQuery, type PageSearchParams } from "@/lib/list-query";
 import { getServerPageError } from "@/lib/api/server-page-error";
 import { getBusinessSegmentLabel } from "@/lib/business-segments";
+import { displayMerchantId } from "@/lib/merchant-id";
 
 type Props = {
   params: Promise<{
@@ -209,6 +210,11 @@ export default async function OrganizationDetailPage({
           <div className="space-y-3 text-sm">
             <p>
               <strong>Code:</strong> {organization.code || "—"}
+            </p>
+
+            <p>
+              <strong>Merchant ID:</strong>{" "}
+              {displayMerchantId(organization.merchant_id)}
             </p>
 
             <p>
@@ -521,6 +527,7 @@ export default async function OrganizationDetailPage({
                 <tr>
                   {[
                     "Agent Code",
+                    "Merchant ID",
                     "Name",
                     "Business Name",
                     "Phone",
@@ -534,6 +541,7 @@ export default async function OrganizationDetailPage({
                       className={`px-6 py-4 text-left text-sm font-semibold text-slate-600 align-middle ${
                         [
                           "Agent Code",
+                          "Merchant ID",
                           "Phone",
                           "Agent Type",
                           "TID",
@@ -560,6 +568,10 @@ export default async function OrganizationDetailPage({
                     <tr key={agent.id} className="hover:bg-slate-50">
                       <td className="whitespace-nowrap px-6 py-4 text-sm font-semibold text-slate-900 align-middle">
                         {agent.agent_code || "—"}
+                      </td>
+
+                      <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-700 align-middle">
+                        {displayMerchantId(agent.merchant_id)}
                       </td>
 
                       <td className="min-w-[150px] px-6 py-4 text-sm text-slate-700 align-middle">

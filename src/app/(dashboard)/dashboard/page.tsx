@@ -5,6 +5,7 @@ import SectionErrorCard, {
 import { getAgents } from "@/lib/api/agents";
 import PageContainer from "@/components/layout/page-container";
 import { getServerPageError } from "@/lib/api/server-page-error";
+import { displayMerchantId } from "@/lib/merchant-id";
 import type { Agent } from "@/types/agent";
 
 function StatCard({
@@ -132,6 +133,9 @@ export default async function DashboardPage() {
                   Agent Code
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">
+                  Merchant ID
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">
                   Name
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">
@@ -148,6 +152,9 @@ export default async function DashboardPage() {
                 <tr key={agent.id} className="hover:bg-slate-50">
                   <td className="px-6 py-4 text-sm font-semibold text-slate-900">
                     {agent.agentCode}
+                  </td>
+                  <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-700">
+                    {displayMerchantId(agent.merchantId)}
                   </td>
                   <td className="px-6 py-4 text-sm text-slate-700">
                     {agent.fullName}

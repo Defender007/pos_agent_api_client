@@ -21,6 +21,7 @@ export type AgentKyc = {
 export type Agent = {
   id: string;
   agentCode: string;
+  merchantId: string | null;
   firstName?: string;
   lastName?: string;
   fullName: string;

@@ -18,6 +18,7 @@ import { getBankAgentById } from "@/lib/api/bank-agents-server";
 import { getServerPageError } from "@/lib/api/server-page-error";
 import { formatAgentStatus, formatAgentType } from "@/lib/agent-display";
 import { getBusinessSegmentLabel } from "@/lib/business-segments";
+import { displayMerchantId } from "@/lib/merchant-id";
 import type { BankAgent } from "@/types/bank-agent";
 
 type BankAgentReviewPageProps = {
@@ -143,6 +144,10 @@ export default async function BankAgentReviewPage({
             </h2>
             <div className="grid gap-5 sm:grid-cols-2">
               <DetailItem label="Agent Code" value={agent.agent_code} />
+              <DetailItem
+                label="Merchant ID"
+                value={displayMerchantId(agent.merchant_id)}
+              />
               <DetailItem
                 label="Agent Type"
                 value={formatAgentType(agent.agent_type)}

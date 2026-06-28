@@ -15,6 +15,7 @@ export type Organization = {
   id: string;
   name: string;
   code: string | null;
+  merchant_id: string | null;
   registration_number: string | null;
   contact_email: string | null;
   contact_phone: string | null;

@@ -26,6 +26,13 @@ export type CreateSolopreneurAgentPayload = {
   };
 };
 
+export type SolopreneurAgentResponse = {
+  id: string;
+  agent_code: string;
+  merchant_id: string | null;
+  tid?: string | null;
+};
+
 function getBankTokenFromBrowser() {
   return document.cookie
     .split("; ")
@@ -35,7 +42,11 @@ function getBankTokenFromBrowser() {
 
 export async function createSolopreneurAgent(
   payload: CreateSolopreneurAgentPayload,
-) {
+): Promise<{
+  success: boolean;
+  message: string;
+  data: SolopreneurAgentResponse;
+}> {
   const token = getBankTokenFromBrowser();
 
   const response = await fetch(

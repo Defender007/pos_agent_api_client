@@ -49,6 +49,7 @@ export type BankAgent = {
   phone: string;
   email?: string | null;
   business_name: string;
+  merchant_id: string | null;
   registration_number?: string | null;
   business_segment?: string | null;
   business_segment_other?: string | null;
