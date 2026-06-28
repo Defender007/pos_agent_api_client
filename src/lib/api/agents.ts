@@ -15,6 +15,7 @@ const API_BASE_URL = getServerApiBaseUrl();
 type AgentListApiItem = {
   id: string;
   agent_code: string;
+  merchant_id: string | null;
   first_name: string;
   last_name: string;
   phone: string;
@@ -34,6 +35,7 @@ type SingleAgentApiResponse = {
   data: {
     id: string;
     agent_code: string;
+    merchant_id: string | null;
     first_name: string;
     last_name: string;
     phone: string;
@@ -70,6 +72,7 @@ function mapAgentListItem(agent: AgentListApiItem): Agent {
   return {
     id: agent.id,
     agentCode: agent.agent_code,
+    merchantId: agent.merchant_id,
     fullName: `${agent.first_name} ${agent.last_name}`,
     phone: agent.phone,
     businessName: agent.business_name,
@@ -132,6 +135,7 @@ export async function getAgentById(agentId: string): Promise<Agent> {
   return {
     id: result.data.id,
     agentCode: result.data.agent_code,
+    merchantId: result.data.merchant_id,
     firstName: result.data.first_name,
     lastName: result.data.last_name,
     fullName: `${result.data.first_name} ${result.data.last_name}`,
