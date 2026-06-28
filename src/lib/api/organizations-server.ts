@@ -8,7 +8,10 @@ import {
   type PaginatedData,
   withListQuery,
 } from "@/lib/api/pagination";
-import type { Organization } from "@/lib/api/organizations";
+import type {
+  MerchantIndemnitySummary,
+  Organization,
+} from "@/lib/api/organizations";
 
 const API_BASE_URL = getServerApiBaseUrl();
 
@@ -32,6 +35,7 @@ export type OrganizationAgent = {
 export type OrganizationDetail = Organization & {
   merchant_staff_count: number;
   agent_count: number;
+  indemnity?: MerchantIndemnitySummary | null;
 };
 
 export type OrganizationStaffMember = {

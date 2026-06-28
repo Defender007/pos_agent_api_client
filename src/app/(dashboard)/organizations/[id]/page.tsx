@@ -9,6 +9,7 @@ import {
 import SectionErrorCard, {
   type SectionErrorCardProps,
 } from "@/components/common/section-error-card";
+import RecordMerchantIndemnityButton from "@/components/organizations/record-merchant-indemnity-button";
 import {
   ClearFiltersButton,
   FilterSelect,
@@ -68,6 +69,22 @@ const businessSegmentOptions = [
   { label: "Others", value: "others" },
 ];
 
+function formatDateTime(value?: string | null) {
+  if (!value) return "—";
+
+  return new Intl.DateTimeFormat("en-NG", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  }).format(new Date(value));
+}
+
+function isStandardOrganization(organization: OrganizationDetail) {
+  return (
+    !organization.is_system &&
+    organization.organization_type !== "solopreneur_system"
+  );
+}
+
 export default async function OrganizationDetailPage({
   params,
   searchParams,
@@ -119,6 +136,72 @@ export default async function OrganizationDetailPage({
         />
       ) : (
         <>
+      {(() => {
+        const indemnity = organization.indemnity;
+        const indemnityStatus = indemnity?.status || "not_captured";
+        const canRecordIndemnity =
+          isStandardOrganization(organization) &&
+          indemnityStatus === "not_captured";
+
+        return (
+          <div className="mt-6 rounded-2xl border bg-white p-6 shadow-sm">
+            <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
+              <div>
+                <h2 className="text-lg font-bold text-slate-900">
+                  Merchant Indemnity
+                </h2>
+                <p className="mt-1 text-sm text-slate-500">
+                  Bank Staff acknowledgement record for this merchant.
+                </p>
+              </div>
+
+              {canRecordIndemnity ? (
+                <RecordMerchantIndemnityButton organizationId={id} />
+              ) : null}
+            </div>
+
+            {indemnityStatus === "accepted" ? (
+              <div className="mt-5 grid gap-4 sm:grid-cols-2 lg:grid-cols-4">
+                <div>
+                  <p className="text-sm text-slate-500">Status</p>
+                  <p className="mt-1 font-semibold text-[#005C2E]">
+                    Accepted
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500">Accepted By</p>
+                  <p className="mt-1 font-semibold text-slate-900">
+                    {indemnity?.accepted_by_name || "—"}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500">Accepted At</p>
+                  <p className="mt-1 font-semibold text-slate-900">
+                    {formatDateTime(indemnity?.accepted_at)}
+                  </p>
+                </div>
+                <div>
+                  <p className="text-sm text-slate-500">Version</p>
+                  <p className="mt-1 font-semibold text-slate-900">
+                    {indemnity?.version || "—"}
+                  </p>
+                </div>
+              </div>
+            ) : (
+              <div className="mt-5 rounded-xl border border-dashed border-[#BFDCCB] bg-[#E6F4EC] p-4">
+                <p className="text-sm font-semibold text-[#005C2E]">
+                  Status: Not Captured
+                </p>
+                <p className="mt-2 text-sm text-slate-700">
+                  This legacy organisation does not yet have a recorded
+                  Merchant Indemnity Acknowledgement.
+                </p>
+              </div>
+            )}
+          </div>
+        );
+      })()}
+
       <div className="mt-6 grid gap-6 md:grid-cols-2">
         <div className="rounded-2xl border bg-white p-6 shadow-sm">
           <h2 className="mb-4 text-lg font-bold">Organization Information</h2>

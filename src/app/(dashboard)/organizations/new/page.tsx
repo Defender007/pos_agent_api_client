@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import MerchantIndemnityAcknowledgement from "@/components/organizations/merchant-indemnity-acknowledgement";
 import { createOrganization } from "@/lib/api/organizations";
 import {
   BUSINESS_SEGMENTS,
@@ -17,6 +18,8 @@ export default function NewOrganizationPage() {
   const [loading, setLoading] = useState(false);
   const [businessSegment, setBusinessSegment] =
     useState<BusinessSegment>("fast_foods");
+  const [indemnityAccepted, setIndemnityAccepted] = useState(false);
+  const [indemnityError, setIndemnityError] = useState<string | null>(null);
 
   return (
     <div className="mx-auto max-w-3xl rounded-2xl border bg-white p-8 shadow-sm">
@@ -49,6 +52,14 @@ export default function NewOrganizationPage() {
             return;
           }
 
+          if (!indemnityAccepted) {
+            const message = "Merchant indemnity acknowledgement is required";
+            setIndemnityError(message);
+            toast.error(message);
+            setLoading(false);
+            return;
+          }
+
           try {
             await createOrganization({
               name: String(formData.get("name")),
@@ -62,6 +73,7 @@ export default function NewOrganizationPage() {
               business_segment_other:
                 businessSegment === "others" ? businessSegmentOther : null,
               is_active: formData.get("is_active") === "on",
+              indemnity_accepted: true,
             });
 
             router.push("/organizations");
@@ -161,9 +173,20 @@ export default function NewOrganizationPage() {
         </div>
 
         <div className="md:col-span-2">
+          <MerchantIndemnityAcknowledgement
+            checked={indemnityAccepted}
+            onCheckedChange={(checked) => {
+              setIndemnityAccepted(checked);
+              if (checked) setIndemnityError(null);
+            }}
+            error={indemnityError}
+          />
+        </div>
+
+        <div className="md:col-span-2">
           <button
             type="submit"
-            disabled={loading}
+            disabled={loading || !indemnityAccepted}
             className="rounded-xl bg-[#007A3D] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#005C2E] disabled:opacity-50"
           >
             {loading ? "Creating..." : "Create Organization"}
