@@ -29,6 +29,14 @@ export type Organization = {
   updated_at: string;
 };
 
+export type MerchantIndemnitySummary = {
+  status: "accepted" | "not_captured";
+  accepted_by_bank_staff_id: string | null;
+  accepted_by_name: string | null;
+  accepted_at: string | null;
+  version: string | null;
+};
+
 export async function createOrganization(payload: {
   name: string;
   code?: string | null;
@@ -40,6 +48,7 @@ export async function createOrganization(payload: {
   business_segment: BusinessSegment;
   business_segment_other?: string | null;
   is_active: boolean;
+  indemnity_accepted: boolean;
 }): Promise<Organization> {
   const token = getBankTokenFromBrowser();
 
@@ -51,6 +60,35 @@ export async function createOrganization(payload: {
     },
     body: JSON.stringify(payload),
   });
+
+  if (!response.ok) {
+    throw await parseApiError(response);
+  }
+
+  const result = await response.json();
+
+  return result.data;
+}
+
+export async function recordOrganizationMerchantIndemnity(
+  organizationId: string,
+  payload: {
+    indemnity_accepted: boolean;
+  },
+) {
+  const token = getBankTokenFromBrowser();
+
+  const response = await fetch(
+    `${API_BASE_URL}/bankadmin/organizations/${organizationId}/indemnity`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        Authorization: `Bearer ${token}`,
+      },
+      body: JSON.stringify(payload),
+    },
+  );
 
   if (!response.ok) {
     throw await parseApiError(response);
