@@ -7,6 +7,7 @@ import PageTitle from "@/components/layout/page-title";
 import SectionCard from "@/components/ui/custom/section-card";
 import StatusBadge from "@/components/ui/custom/status-badge";
 import { displayMerchantId } from "@/lib/merchant-id";
+import { displayBillerId, displayBillerName } from "@/lib/biller-display";
 import { getServerPageError } from "@/lib/api/server-page-error";
 import type { Agent } from "@/types/agent";
 
@@ -86,6 +87,14 @@ export default async function AgentDetailsPage({
             <DetailItem
               label="Merchant ID"
               value={displayMerchantId(agent.merchantId)}
+            />
+            <DetailItem
+              label="Biller Name"
+              value={displayBillerName(agent.billerName)}
+            />
+            <DetailItem
+              label="Biller ID"
+              value={displayBillerId(agent.billerId)}
             />
             <DetailItem label="First Name" value={agent.firstName} />
             <DetailItem label="Last Name" value={agent.lastName} />

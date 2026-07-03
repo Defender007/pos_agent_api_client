@@ -19,6 +19,7 @@ import { getServerPageError } from "@/lib/api/server-page-error";
 import { formatAgentStatus, formatAgentType } from "@/lib/agent-display";
 import { getBusinessSegmentLabel } from "@/lib/business-segments";
 import { displayMerchantId } from "@/lib/merchant-id";
+import { displayBillerId, displayBillerName } from "@/lib/biller-display";
 import type { BankAgent } from "@/types/bank-agent";
 
 type BankAgentReviewPageProps = {
@@ -147,6 +148,14 @@ export default async function BankAgentReviewPage({
               <DetailItem
                 label="Merchant ID"
                 value={displayMerchantId(agent.merchant_id)}
+              />
+              <DetailItem
+                label="Biller Name"
+                value={displayBillerName(agent.biller_name)}
+              />
+              <DetailItem
+                label="Biller ID"
+                value={displayBillerId(agent.biller_id)}
               />
               <DetailItem
                 label="Agent Type"

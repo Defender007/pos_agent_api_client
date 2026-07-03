@@ -50,6 +50,8 @@ export type BankAgent = {
   email?: string | null;
   business_name: string;
   merchant_id: string | null;
+  biller_id: string | null;
+  biller_name: string | null;
   registration_number?: string | null;
   business_segment?: string | null;
   business_segment_other?: string | null;

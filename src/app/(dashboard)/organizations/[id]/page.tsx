@@ -33,6 +33,7 @@ import { getListQuery, type PageSearchParams } from "@/lib/list-query";
 import { getServerPageError } from "@/lib/api/server-page-error";
 import { getBusinessSegmentLabel } from "@/lib/business-segments";
 import { displayMerchantId } from "@/lib/merchant-id";
+import { displayBillerId, displayBillerName } from "@/lib/biller-display";
 
 type Props = {
   params: Promise<{
@@ -215,6 +216,16 @@ export default async function OrganizationDetailPage({
             <p>
               <strong>Merchant ID:</strong>{" "}
               {displayMerchantId(organization.merchant_id)}
+            </p>
+
+            <p>
+              <strong>Biller Name:</strong>{" "}
+              {displayBillerName(organization.biller_name)}
+            </p>
+
+            <p>
+              <strong>Biller ID:</strong>{" "}
+              {displayBillerId(organization.biller_id)}
             </p>
 
             <p>
@@ -522,12 +533,13 @@ export default async function OrganizationDetailPage({
           </div>
         ) : (
           <div className="mt-4 w-full overflow-x-auto rounded-xl border">
-            <table className="w-full min-w-[1100px] table-auto">
+            <table className="w-full min-w-[1300px] table-auto">
               <thead className="bg-slate-50">
                 <tr>
                   {[
                     "Agent Code",
                     "Merchant ID",
+                    "Biller",
                     "Name",
                     "Business Name",
                     "Phone",
@@ -542,6 +554,7 @@ export default async function OrganizationDetailPage({
                         [
                           "Agent Code",
                           "Merchant ID",
+                          "Biller",
                           "Phone",
                           "Agent Type",
                           "TID",
@@ -572,6 +585,21 @@ export default async function OrganizationDetailPage({
 
                       <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-700 align-middle">
                         {displayMerchantId(agent.merchant_id)}
+                      </td>
+
+                      <td className="min-w-[220px] px-6 py-4 text-sm text-slate-700 align-middle">
+                        {agent.biller_id || agent.biller_name ? (
+                          <div>
+                            <p className="font-medium text-slate-900">
+                              {displayBillerName(agent.biller_name)}
+                            </p>
+                            <p className="mt-1 text-xs text-slate-500">
+                              {displayBillerId(agent.biller_id)}
+                            </p>
+                          </div>
+                        ) : (
+                          "—"
+                        )}
                       </td>
 
                       <td className="min-w-[150px] px-6 py-4 text-sm text-slate-700 align-middle">

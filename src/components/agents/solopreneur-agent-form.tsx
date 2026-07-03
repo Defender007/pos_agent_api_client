@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import BillerSelect from "@/components/billers/biller-select";
 import { ApiError } from "@/lib/api/api-error";
 import { createSolopreneurAgent } from "@/lib/api/solopreneur-agents-client";
 import {
@@ -18,6 +19,8 @@ export default function SolopreneurAgentForm() {
   const [businessSegment, setBusinessSegment] = useState<
     BusinessSegment | ""
   >("");
+  const [billerId, setBillerId] = useState("");
+  const [billerError, setBillerError] = useState<string | null>(null);
   const [latitude, setLatitude] = useState<number | null>(null);
   const [longitude, setLongitude] = useState<number | null>(null);
   const [locationLoading, setLocationLoading] = useState(false);
@@ -86,6 +89,13 @@ export default function SolopreneurAgentForm() {
       return;
     }
 
+    if (!billerId) {
+      const message = "Please select a biller";
+      setBillerError(message);
+      toast.error(message);
+      return;
+    }
+
     setSubmitting(true);
 
     try {
@@ -105,6 +115,7 @@ export default function SolopreneurAgentForm() {
         business_segment: businessSegment,
         business_segment_other:
           businessSegment === "others" ? businessSegmentOther : null,
+        biller_id: billerId,
         kyc: {
           bvn: String(formData.get("bvn")).trim(),
           nin: String(formData.get("nin")).trim(),
@@ -193,6 +204,19 @@ export default function SolopreneurAgentForm() {
           label="Registration Number / RC Number"
           placeholder="e.g. RC1234567"
         />
+
+        <div className="md:col-span-2">
+          <BillerSelect
+            value={billerId}
+            onValueChange={(value) => {
+              setBillerId(value);
+              if (value) setBillerError(null);
+            }}
+            required
+            error={billerError || undefined}
+            authContext="bank"
+          />
+        </div>
 
         <div className="md:col-span-2">
           <label className="mb-2 block text-sm font-semibold text-slate-700">
@@ -315,7 +339,7 @@ export default function SolopreneurAgentForm() {
       <div className="flex justify-end border-t border-slate-200 pt-6">
         <button
           type="submit"
-          disabled={submitting || !hasCapturedLocation}
+          disabled={submitting || !hasCapturedLocation || !billerId}
           className="rounded-xl bg-[#007A3D] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#005C2E] disabled:cursor-not-allowed disabled:opacity-50"
         >
           {submitting ? "Creating Agent..." : "Create Solopreneur Agent"}

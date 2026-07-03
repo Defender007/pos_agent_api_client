@@ -3,6 +3,7 @@ import { Agent } from "@/types/agent";
 import Link from "next/link";
 import { EmptyState } from "@/components/list/list-controls";
 import { displayMerchantId } from "@/lib/merchant-id";
+import { displayBillerId, displayBillerName } from "@/lib/biller-display";
 
 type AgentsTableProps = {
   agents: Agent[];
@@ -13,7 +14,7 @@ export default function AgentsTable({ agents }: AgentsTableProps) {
   }
   return (
     <div className="w-full overflow-x-auto">
-      <table className="w-full min-w-[900px] table-auto">
+      <table className="w-full min-w-[1100px] table-auto">
         <thead>
           <tr className="border-b bg-slate-50 text-left">
             <th className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-slate-600 align-middle">
@@ -21,6 +22,9 @@ export default function AgentsTable({ agents }: AgentsTableProps) {
             </th>
             <th className="whitespace-nowrap px-4 py-3 text-sm font-semibold text-slate-600 align-middle">
               Merchant ID
+            </th>
+            <th className="min-w-[220px] px-4 py-3 text-sm font-semibold text-slate-600 align-middle">
+              Biller
             </th>
             <th className="min-w-[150px] px-4 py-3 text-sm font-semibold text-slate-600 align-middle">
               Full Name
@@ -49,6 +53,21 @@ export default function AgentsTable({ agents }: AgentsTableProps) {
 
             <td className="whitespace-nowrap px-4 py-4 text-sm text-slate-700 align-middle">
               {displayMerchantId(agent.merchantId)}
+            </td>
+
+            <td className="min-w-[220px] px-4 py-4 text-sm text-slate-700 align-middle">
+              {agent.billerId || agent.billerName ? (
+                <div>
+                  <p className="font-medium text-slate-900">
+                    {displayBillerName(agent.billerName)}
+                  </p>
+                  <p className="mt-1 text-xs text-slate-500">
+                    {displayBillerId(agent.billerId)}
+                  </p>
+                </div>
+              ) : (
+                "—"
+              )}
             </td>
 
             <td className="min-w-[150px] px-4 py-4 text-sm text-slate-700 align-middle">
