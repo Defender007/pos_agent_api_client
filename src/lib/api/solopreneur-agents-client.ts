@@ -9,6 +9,7 @@ export type CreateSolopreneurAgentPayload = {
   phone: string;
   email: string;
   business_name: string;
+  biller_id: string;
   registration_number: string | null;
   business_segment: BusinessSegment;
   business_segment_other: string | null;
@@ -30,6 +31,8 @@ export type SolopreneurAgentResponse = {
   id: string;
   agent_code: string;
   merchant_id: string | null;
+  biller_id: string | null;
+  biller_name: string | null;
   tid?: string | null;
 };
 

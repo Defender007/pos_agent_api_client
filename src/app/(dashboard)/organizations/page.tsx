@@ -23,6 +23,7 @@ import { getListQuery, type PageSearchParams } from "@/lib/list-query";
 import { getServerPageError } from "@/lib/api/server-page-error";
 import { getBusinessSegmentLabel } from "@/lib/business-segments";
 import { displayMerchantId } from "@/lib/merchant-id";
+import { displayBillerId, displayBillerName } from "@/lib/biller-display";
 
 type Props = {
   searchParams: Promise<PageSearchParams>;
@@ -167,13 +168,14 @@ export default async function OrganizationsPage({ searchParams }: Props) {
           </div>
         ) : (
         <div className="overflow-x-auto">
-        <table className="w-full min-w-[1000px]">
+        <table className="w-full min-w-[1200px]">
           <thead className="bg-slate-50">
             <tr>
               {[
                 "Name",
                 "Code",
                 "Merchant ID",
+                "Biller",
                 "Type",
                 "Business Segment",
                 "Email",
@@ -201,6 +203,21 @@ export default async function OrganizationsPage({ searchParams }: Props) {
 
                 <td className="whitespace-nowrap px-6 py-4">
                   {displayMerchantId(org.merchant_id)}
+                </td>
+
+                <td className="min-w-[220px] px-6 py-4">
+                  {org.biller_id || org.biller_name ? (
+                    <div>
+                      <p className="font-medium text-slate-900">
+                        {displayBillerName(org.biller_name)}
+                      </p>
+                      <p className="mt-1 text-xs text-slate-500">
+                        {displayBillerId(org.biller_id)}
+                      </p>
+                    </div>
+                  ) : (
+                    "—"
+                  )}
                 </td>
 
                 <td className="px-6 py-4">

@@ -16,6 +16,8 @@ export type Organization = {
   name: string;
   code: string | null;
   merchant_id: string | null;
+  biller_id: string | null;
+  biller_name: string | null;
   registration_number: string | null;
   contact_email: string | null;
   contact_phone: string | null;
@@ -50,6 +52,7 @@ export async function createOrganization(payload: {
   business_segment_other?: string | null;
   is_active: boolean;
   indemnity_accepted: boolean;
+  biller_id: string;
 }): Promise<Organization> {
   const token = getBankTokenFromBrowser();
 

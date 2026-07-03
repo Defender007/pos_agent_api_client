@@ -6,6 +6,7 @@ import { getAgents } from "@/lib/api/agents";
 import PageContainer from "@/components/layout/page-container";
 import { getServerPageError } from "@/lib/api/server-page-error";
 import { displayMerchantId } from "@/lib/merchant-id";
+import { displayBillerId, displayBillerName } from "@/lib/biller-display";
 import type { Agent } from "@/types/agent";
 
 function StatCard({
@@ -125,8 +126,8 @@ export default async function DashboardPage() {
           </div>
         </div>
 
-        <div className="overflow-hidden rounded-xl border">
-          <table className="w-full">
+        <div className="overflow-x-auto rounded-xl border">
+          <table className="w-full min-w-[900px] table-auto">
             <thead className="bg-slate-50">
               <tr>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">
@@ -134,6 +135,9 @@ export default async function DashboardPage() {
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">
                   Merchant ID
+                </th>
+                <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">
+                  Biller
                 </th>
                 <th className="px-6 py-4 text-left text-sm font-semibold text-slate-600">
                   Name
@@ -155,6 +159,20 @@ export default async function DashboardPage() {
                   </td>
                   <td className="whitespace-nowrap px-6 py-4 text-sm text-slate-700">
                     {displayMerchantId(agent.merchantId)}
+                  </td>
+                  <td className="min-w-[220px] px-6 py-4 text-sm text-slate-700">
+                    {agent.billerId || agent.billerName ? (
+                      <div>
+                        <p className="font-medium text-slate-900">
+                          {displayBillerName(agent.billerName)}
+                        </p>
+                        <p className="mt-1 text-xs text-slate-500">
+                          {displayBillerId(agent.billerId)}
+                        </p>
+                      </div>
+                    ) : (
+                      "—"
+                    )}
                   </td>
                   <td className="px-6 py-4 text-sm text-slate-700">
                     {agent.fullName}

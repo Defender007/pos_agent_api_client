@@ -22,6 +22,8 @@ export type Agent = {
   id: string;
   agentCode: string;
   merchantId: string | null;
+  billerId: string | null;
+  billerName: string | null;
   firstName?: string;
   lastName?: string;
   fullName: string;

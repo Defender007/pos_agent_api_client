@@ -24,6 +24,8 @@ export type OrganizationAgent = {
   email: string;
   business_name: string;
   merchant_id: string | null;
+  biller_id: string | null;
+  biller_name: string | null;
   agent_type?: "standard" | "solopreneur" | null;
   tid?: string | null;
   organization_id: string;

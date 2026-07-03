@@ -16,6 +16,8 @@ type AgentListApiItem = {
   id: string;
   agent_code: string;
   merchant_id: string | null;
+  biller_id: string | null;
+  biller_name: string | null;
   first_name: string;
   last_name: string;
   phone: string;
@@ -36,6 +38,8 @@ type SingleAgentApiResponse = {
     id: string;
     agent_code: string;
     merchant_id: string | null;
+    biller_id: string | null;
+    biller_name: string | null;
     first_name: string;
     last_name: string;
     phone: string;
@@ -73,6 +77,8 @@ function mapAgentListItem(agent: AgentListApiItem): Agent {
     id: agent.id,
     agentCode: agent.agent_code,
     merchantId: agent.merchant_id,
+    billerId: agent.biller_id,
+    billerName: agent.biller_name,
     fullName: `${agent.first_name} ${agent.last_name}`,
     phone: agent.phone,
     businessName: agent.business_name,
@@ -136,6 +142,8 @@ export async function getAgentById(agentId: string): Promise<Agent> {
     id: result.data.id,
     agentCode: result.data.agent_code,
     merchantId: result.data.merchant_id,
+    billerId: result.data.biller_id,
+    billerName: result.data.biller_name,
     firstName: result.data.first_name,
     lastName: result.data.last_name,
     fullName: `${result.data.first_name} ${result.data.last_name}`,

@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
 
+import BillerSelect from "@/components/billers/biller-select";
 import MerchantIndemnityAcknowledgement from "@/components/organizations/merchant-indemnity-acknowledgement";
 import { createOrganization } from "@/lib/api/organizations";
 import {
@@ -18,6 +19,8 @@ export default function NewOrganizationPage() {
   const [loading, setLoading] = useState(false);
   const [businessSegment, setBusinessSegment] =
     useState<BusinessSegment>("fast_foods");
+  const [billerId, setBillerId] = useState("");
+  const [billerError, setBillerError] = useState<string | null>(null);
   const [indemnityAccepted, setIndemnityAccepted] = useState(false);
   const [indemnityError, setIndemnityError] = useState<string | null>(null);
 
@@ -52,6 +55,14 @@ export default function NewOrganizationPage() {
             return;
           }
 
+          if (!billerId) {
+            const message = "Please select a biller";
+            setBillerError(message);
+            toast.error(message);
+            setLoading(false);
+            return;
+          }
+
           if (!indemnityAccepted) {
             const message = "Merchant indemnity acknowledgement is required";
             setIndemnityError(message);
@@ -74,6 +85,7 @@ export default function NewOrganizationPage() {
                 businessSegment === "others" ? businessSegmentOther : null,
               is_active: formData.get("is_active") === "on",
               indemnity_accepted: true,
+              biller_id: billerId,
             });
 
             router.push("/organizations");
@@ -165,6 +177,19 @@ export default function NewOrganizationPage() {
         </div>
 
         <div className="md:col-span-2">
+          <BillerSelect
+            value={billerId}
+            onValueChange={(value) => {
+              setBillerId(value);
+              if (value) setBillerError(null);
+            }}
+            required
+            error={billerError || undefined}
+            authContext="bank"
+          />
+        </div>
+
+        <div className="md:col-span-2">
           <label className="flex items-center gap-3">
             <input type="checkbox" name="is_active" defaultChecked />
 
@@ -186,7 +211,7 @@ export default function NewOrganizationPage() {
         <div className="md:col-span-2">
           <button
             type="submit"
-            disabled={loading || !indemnityAccepted}
+            disabled={loading || !indemnityAccepted || !billerId}
             className="rounded-xl bg-[#007A3D] px-6 py-3 text-sm font-semibold text-white transition hover:bg-[#005C2E] disabled:opacity-50"
           >
             {loading ? "Creating..." : "Create Organization"}
