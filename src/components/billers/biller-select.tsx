@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import {
@@ -14,6 +15,7 @@ import {
   type BillerOption,
   type FetchBillersOptions,
 } from "@/lib/api/billers";
+import { ApiError } from "@/lib/api/api-error";
 
 type BillerSelectProps = {
   value: string;
@@ -38,6 +40,7 @@ export default function BillerSelect({
   error,
   authContext = "bank",
 }: BillerSelectProps) {
+  const router = useRouter();
   const [billers, setBillers] = useState<BillerOption[]>([]);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -77,6 +80,15 @@ export default function BillerSelect({
       setPage(result.page);
       setHasMore(result.hasNext);
     } catch (error) {
+      if (error instanceof ApiError && error.message === "SESSION_EXPIRED") {
+        router.push(
+          authContext === "bank"
+            ? "/backoffice/login?session=expired"
+            : "/login?session=expired",
+        );
+        return;
+      }
+
       setLoadError(
         error instanceof Error
           ? error.message
