@@ -1,5 +1,6 @@
 "use client";
 
+import { useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 
 import {
@@ -14,6 +15,7 @@ import {
   type BillerOption,
   type FetchBillersOptions,
 } from "@/lib/api/billers";
+import { ApiError } from "@/lib/api/api-error";
 
 type BillerSelectProps = {
   value: string;
@@ -38,6 +40,7 @@ export default function BillerSelect({
   error,
   authContext = "bank",
 }: BillerSelectProps) {
+  const router = useRouter();
   const [billers, setBillers] = useState<BillerOption[]>([]);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
@@ -50,7 +53,7 @@ export default function BillerSelect({
     [billers, value],
   );
 
-  async function loadBillers(nextPage = 0, append = false) {
+  async function loadBillers(nextPage = 1, append = false) {
     if (append) {
       setLoadingMore(true);
     } else {
@@ -62,7 +65,7 @@ export default function BillerSelect({
     try {
       const result = await fetchBillers({
         page: nextPage,
-        size: PAGE_SIZE,
+        pageSize: PAGE_SIZE,
         authContext,
       });
 
@@ -75,8 +78,17 @@ export default function BillerSelect({
         return Array.from(unique.values());
       });
       setPage(result.page);
-      setHasMore(result.items.length >= result.size);
+      setHasMore(result.hasNext);
     } catch (error) {
+      if (error instanceof ApiError && error.message === "SESSION_EXPIRED") {
+        router.push(
+          authContext === "bank"
+            ? "/backoffice/login?session=expired"
+            : "/login?session=expired",
+        );
+        return;
+      }
+
       setLoadError(
         error instanceof Error
           ? error.message
@@ -90,7 +102,7 @@ export default function BillerSelect({
 
   useEffect(() => {
     const timeoutId = window.setTimeout(() => {
-      loadBillers(0);
+      loadBillers(1);
     }, 0);
 
     return () => window.clearTimeout(timeoutId);
@@ -146,7 +158,7 @@ export default function BillerSelect({
           </p>
           <button
             type="button"
-            onClick={() => loadBillers(0)}
+            onClick={() => loadBillers(1)}
             className="rounded-lg border border-slate-300 px-3 py-2 text-sm font-semibold text-slate-700 hover:bg-slate-100"
           >
             Retry

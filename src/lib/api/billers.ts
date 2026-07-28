@@ -10,14 +10,16 @@ export type BillerOption = {
 
 export type FetchBillersOptions = {
   page?: number;
-  size?: number;
+  pageSize?: number;
+  search?: string;
   authContext?: "bank" | "merchant";
 };
 
 export type BillersPage = {
   items: BillerOption[];
   page: number;
-  size: number;
+  pageSize: number;
+  hasNext: boolean;
 };
 
 function getCookie(name: string) {
@@ -28,14 +30,20 @@ function getCookie(name: string) {
 }
 
 export async function fetchBillers({
-  page = 0,
-  size = 100,
+  page = 1,
+  pageSize = 100,
+  search,
   authContext = "bank",
 }: FetchBillersOptions = {}): Promise<BillersPage> {
   const params = new URLSearchParams({
     page: String(page),
-    size: String(size),
+    page_size: String(pageSize),
   });
+
+  if (search?.trim()) {
+    params.set("search", search.trim());
+  }
+
   const token = getCookie(
     authContext === "bank" ? "bank_access_token" : "access_token",
   );
@@ -52,11 +60,13 @@ export async function fetchBillers({
   }
 
   const result = await response.json();
+  const data = result.data || {};
+  const pagination = data.pagination || {};
 
   return {
-    items: result.data?.items || [],
-    page: Number(result.data?.page ?? page),
-    size: Number(result.data?.size ?? size),
+    items: data.items || [],
+    page: Number(pagination.page ?? page),
+    pageSize: Number(pagination.page_size ?? pageSize),
+    hasNext: Boolean(pagination.has_next),
   };
 }
-
